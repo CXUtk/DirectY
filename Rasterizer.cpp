@@ -15,12 +15,13 @@ Rasterizer::Rasterizer(int width, int height, SampleStyle style) {
     _sampleStyle = style;
     _sampleCount = 1;
     if (style == SampleStyle::X2)_sampleCount = 4;
+    if (style == SampleStyle::X4)_sampleCount = 16;
     _width = width, _height = height;
 
     _framebuffer = new RColor[width * height];
     _sampleBuffer = new glm::vec3[width * height * _sampleCount];
     _depthBuffer = new float[width * height * _sampleCount];
-    _shadowMap = new float[width * height * _sampleCount];
+    _shadowMap = new float[width * height];
 
     _lights = Light(glm::vec3(0, 5, -5), glm::vec3(15, 15, 15));
 }
@@ -37,45 +38,6 @@ glm::vec3 to_vec3(glm::vec4 v) {
     return glm::vec3(v.x, v.y, v.z);
 }
 
-void Rasterizer::DrawTriangles(const std::vector<Triangle>& triangles, DrawStyle style) {
-    glm::mat4 vm = _view * _model;
-    for (const auto& t : triangles) {
-        Triangle tmp;
-        glm::vec4 viewPos[3];
-        glm::vec3 vp[3];
-        memcpy(&tmp, &t, sizeof(Triangle));
-        memcpy(viewPos, t.vs, sizeof(t.vs));
-        for (int i = 0; i < 3; i++) {
-            viewPos[i] = vm * tmp.vs[i];
-            tmp.vs[i] = _projection * viewPos[i];
-        }
-        for (int i = 0; i < 3; i++) {
-            tmp.vs[i].x /= tmp.vs[i].w;
-            tmp.vs[i].y /= tmp.vs[i].w;
-            tmp.vs[i].z /= tmp.vs[i].w;
-        }
-        for (int i = 0; i < 3; i++) {
-            tmp.vs[i].x = _width * 0.5f * (tmp.vs[i].x + 1);
-            tmp.vs[i].y = _height * 0.5f * (tmp.vs[i].y + 1);
-        }
-        for (int i = 0; i < 3; i++) {
-            vp[i] = to_vec3(viewPos[i]);
-        }
-
-        glm::mat4 inverse = _view * _model;
-        for (int i = 0; i < 3; i++) {
-            tmp.normals[i] = inverse * glm::vec4(tmp.normals[i], 0.f);
-        }
-        if (style == DrawStyle::WireFrame) {
-            draw_line(tmp.vs[0], tmp.vs[1]);
-            draw_line(tmp.vs[1], tmp.vs[2]);
-            draw_line(tmp.vs[2], tmp.vs[0]);
-        }
-        else {
-            raster_triangle(tmp, vp);
-        }
-    }
-}
 
 void Rasterizer::DrawModels(const std::vector<Model>& models, DrawStyle style) {
 
@@ -108,7 +70,7 @@ void Rasterizer::DrawModels(const std::vector<Model>& models, DrawStyle style) {
             for (int i = 0; i < 3; i++) {
                 screenTri.normals[i] = _view * glm::vec4(t.normals[i], 0.f);
             }
-            raster_triangle(screenTri, viewPos);
+            raster_triangle(screenTri, viewPos, model.GetTexture());
         }
     }
 }
@@ -213,7 +175,7 @@ void Rasterizer::Clear() {
 
     memset(_sampleBuffer, 0, _width * _height * _sampleCount * sizeof(glm::vec3));
     memset(_depthBuffer, 0x7f, _width * _height * _sampleCount * sizeof(float));
-    memset(_shadowMap, 0x7f, _width * _height * _sampleCount * sizeof(float));
+    memset(_shadowMap, 0x7f, _width * _height * sizeof(float));
 }
 
 
@@ -226,8 +188,8 @@ void Rasterizer::set_pixel(int x, int y, int id, const glm::vec3& color) {
 void Rasterizer::set_depth_shadow(int x, int y, int id, float depth) {
     if (x >= _width || x < 0 || y >= _height || y < 0) return;
     int idx = y * _width + x;
-    if (_shadowMap[idx * _sampleCount + id] < depth) return;
-    _shadowMap[idx * _sampleCount + id] = depth;
+    if (_shadowMap[idx + id] < depth) return;
+    _shadowMap[idx + id] = depth;
 }
 
 void Rasterizer::set_pixel_alpha_blend(int x, int y, int id, const glm::vec3& color, float alpha) {
@@ -332,7 +294,7 @@ static float interpolate(float alpha, float beta, float gamma, float v1, float v
 }
 
 
-void Rasterizer::raster_triangle(const Triangle& t, const glm::vec3* viewPos) {
+void Rasterizer::raster_triangle(const Triangle& t, const glm::vec3* viewPos, Texture* texture) {
     int minnX = _width - 1, minnY = _height - 1;
     int maxxX = 0, maxxY = 0;
     for (int i = 0; i < 3; i++) {
@@ -362,28 +324,33 @@ void Rasterizer::raster_triangle(const Triangle& t, const glm::vec3* viewPos) {
                         auto tex_coord = interpolate(interp.x, interp.y, interp.z, t.tex_coords[0] / t.vs[0].w, t.tex_coords[1] / t.vs[1].w, t.tex_coords[2] / t.vs[2].w, 1) * w_reciprocal;
                         fragment_shader_payload info(interpolated_color, interpolated_normal, tex_coord);
                         info.view_pos = interpolated_shadingcoords;
+                        info.texture = texture;
                         set_pixel(i, j, 0, _currentShader ? _currentShader(info) : shader_function(info));
                     }
                 }
             }
-            else {
+            else if (_sampleStyle == SampleStyle::X2) {
                 for (int k = 0; k < _sampleCount; k++) {
                     glm::vec2 sp = glm::vec2(i + samplePoint[k].x, j + samplePoint[k].y);
                     auto interp = computeBarycentric2D(sp, t.vs);
                     if (in_triangle(interp, tv)) {
-                        float w_reciprocal = 1.0 / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
-                        auto z_interp = interpolate(interp.x, interp.y, interp.z, t.vs[0].z / t.vs[0].w, t.vs[1].z / t.vs[1].w, t.vs[2].z / t.vs[2].w, 1) * w_reciprocal;
+                        float w_reciprocal = 1.0f / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
+                        auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
+                        auto interpolated_shadingcoords = interpolate(interp.x, interp.y, interp.z, viewPos[0] / t.vs[0].w, viewPos[1] / t.vs[1].w, viewPos[2] / t.vs[2].w, 1) * w_reciprocal;
                         if (depth_test(i, j, k, z_interp)) {
                             auto interpolated_color = interpolate(interp.x, interp.y, interp.z, t.color[0] / t.vs[0].w, t.color[1] / t.vs[1].w, t.color[2] / t.vs[2].w, 1) * w_reciprocal;
                             auto interpolated_normal = interpolate(interp.x, interp.y, interp.z, t.normals[0] / t.vs[0].w, t.normals[1] / t.vs[1].w, t.normals[2] / t.vs[2].w, 1) * w_reciprocal;
                             auto tex_coord = interpolate(interp.x, interp.y, interp.z, t.tex_coords[0] / t.vs[0].w, t.tex_coords[1] / t.vs[1].w, t.tex_coords[2] / t.vs[2].w, 1) * w_reciprocal;
-                            auto interpolated_shadingcoords = interpolate(interp.x, interp.y, interp.z, viewPos[0] / t.vs[0].w, viewPos[1] / t.vs[1].w, viewPos[2] / t.vs[2].w, 1) * w_reciprocal;
                             fragment_shader_payload info(interpolated_color, interpolated_normal, tex_coord);
                             info.view_pos = interpolated_shadingcoords;
-                            set_pixel(i, j, k, shader_function(info));
+                            info.texture = texture;
+                            set_pixel(i, j, k, _currentShader ? _currentShader(info) : shader_function(info));
                         }
                     }
                 }
+            }
+            else {
+                do_multi_sample((int)sqrt(_sampleCount + 0.5), t, viewPos, texture, i, j);
             }
         }
     }
@@ -406,26 +373,26 @@ void Rasterizer::raster_shadowmap(const Triangle& t) {
     glm::vec2 tv[3] = { {t.vs[0].x, t.vs[0].y}, {t.vs[1].x, t.vs[1].y}, {t.vs[2].x, t.vs[2].y} };
     for (int i = minnX; i <= maxxX; i++) {
         for (int j = minnY; j <= maxxY; j++) {
-            if (_sampleStyle == SampleStyle::None) {
-                glm::vec2 sp = glm::vec2(i + 0.5f, j + 0.5f);
-                auto interp = computeBarycentric2D(sp, t.vs);
-                if (in_triangle(interp, tv)) {
-                    float w_reciprocal = 1.0 / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
-                    auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
-                    set_depth_shadow(i, j, 0, z_interp);
-                }
+            //if (_sampleStyle == SampleStyle::None) {
+            glm::vec2 sp = glm::vec2(i + 0.5f, j + 0.5f);
+            auto interp = computeBarycentric2D(sp, t.vs);
+            if (in_triangle(interp, tv)) {
+                float w_reciprocal = 1.0 / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
+                auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
+                set_depth_shadow(i, j, 0, z_interp);
             }
-            else {
-                for (int k = 0; k < _sampleCount; k++) {
-                    glm::vec2 sp = glm::vec2(i + samplePoint[k].x, j + samplePoint[k].y);
-                    auto interp = computeBarycentric2D(sp, t.vs);
-                    if (in_triangle(interp, tv)) {
-                        float w_reciprocal = 1.0 / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
-                        auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
-                        set_depth_shadow(i, j, k, z_interp);
-                    }
-                }
-            }
+            /* }
+             else {
+                 for (int k = 0; k < _sampleCount; k++) {
+                     glm::vec2 sp = glm::vec2(i + samplePoint[k].x, j + samplePoint[k].y);
+                     auto interp = computeBarycentric2D(sp, t.vs);
+                     if (in_triangle(interp, tv)) {
+                         float w_reciprocal = 1.0 / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
+                         auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
+                         set_depth_shadow(i, j, k, z_interp);
+                     }
+                 }
+             }*/
         }
     }
 }
@@ -437,7 +404,7 @@ bool Rasterizer::shadowmap_test(const glm::vec4& worldPos) const {
     int x = _width * 0.5f * (p.x + 1);
     int y = _height * 0.5f * (p.y + 1);
     if (x >= _width || x < 0 || y >= _height || y < 0) return true;
-    int idx = y * _width + x;
+    int idx = (y * _width + x);
     return w - 1e-2 <= _shadowMap[idx];
 }
 
@@ -456,9 +423,37 @@ void Rasterizer::copy_to_frameBuffer() {
     }
 }
 
+void Rasterizer::do_multi_sample(int K, const Triangle& t, const glm::vec3* viewPos, Texture* texture, int X, int Y) {
+    glm::vec2 tv[3] = { {t.vs[0].x, t.vs[0].y}, {t.vs[1].x, t.vs[1].y}, {t.vs[2].x, t.vs[2].y} };
+    float div = 1.f / (float)K;
+    for (int i = 0; i < K; i++) {
+        for (int j = 0; j < K; j++) {
+            float dv = (2 * i + 1) * div / 2.f;
+            float dc = (2 * j + 1) * div / 2.f;
+            glm::vec2 sp(X + dv, Y + dc);
+            auto interp = computeBarycentric2D(sp, t.vs);
+            if (in_triangle(interp, tv)) {
+                float w_reciprocal = 1.0f / (interp.x / t.vs[0].w + interp.y / t.vs[1].w + interp.z / t.vs[2].w);
+                auto z_interp = interpolate(interp.x, interp.y, interp.z, 1, 1, 1, 1) * w_reciprocal;
+                auto interpolated_shadingcoords = interpolate(interp.x, interp.y, interp.z, viewPos[0] / t.vs[0].w, viewPos[1] / t.vs[1].w, viewPos[2] / t.vs[2].w, 1) * w_reciprocal;
+                if (depth_test(X, Y, i * K + j, z_interp)) {
+                    auto interpolated_color = interpolate(interp.x, interp.y, interp.z, t.color[0] / t.vs[0].w, t.color[1] / t.vs[1].w, t.color[2] / t.vs[2].w, 1) * w_reciprocal;
+                    auto interpolated_normal = interpolate(interp.x, interp.y, interp.z, t.normals[0] / t.vs[0].w, t.normals[1] / t.vs[1].w, t.normals[2] / t.vs[2].w, 1) * w_reciprocal;
+                    auto tex_coord = interpolate(interp.x, interp.y, interp.z, t.tex_coords[0] / t.vs[0].w, t.tex_coords[1] / t.vs[1].w, t.tex_coords[2] / t.vs[2].w, 1) * w_reciprocal;
+                    fragment_shader_payload info(interpolated_color, interpolated_normal, tex_coord);
+                    info.view_pos = interpolated_shadingcoords;
+                    info.texture = texture;
+                    set_pixel(X, Y, i * K + j, _currentShader ? _currentShader(info) : shader_function(info));
+                }
+            }
+        }
+    }
+}
+
 glm::vec3 Rasterizer::shader_function(const fragment_shader_payload& info) {
-    glm::vec3 ka = glm::vec3(0.1, 0.1, 0.1);
-    glm::vec3 kd = info.color;
+
+    glm::vec3 kd = info.texture ? (info.texture->GetBinlinearClamp(info.tex_coords.x, info.tex_coords.y)) : glm::vec3(1, 1, 1);
+    glm::vec3 ka = glm::vec3(0.1, 0.1, 0.1) * kd;
     glm::vec3 ks = glm::vec3(0.7f, 0.7f, 0.7f);
     float amb_intensity = 0.5f;
 

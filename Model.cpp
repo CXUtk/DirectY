@@ -4,6 +4,7 @@ Model::Model(const std::vector<Triangle>& triangles) {
     _transform = glm::identity<glm::mat4>();
     std::copy(triangles.begin(), triangles.end(), std::back_inserter(_triangles));
     _shader = nullptr;
+    _texture = nullptr;
 }
 
 Model::~Model() {

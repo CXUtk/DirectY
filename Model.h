@@ -1,8 +1,11 @@
 ﻿#pragma once
 #include <vector>
+#include <string>
 #include <glm\glm.hpp>
+#include "lodepng.h"
 #include "Triangle.h"
 #include "Shader.h"
+#include "Texture.h"
 
 typedef glm::vec3(*fragment_shader)(const fragment_shader_payload& payload);
 class Model {
@@ -31,9 +34,14 @@ public:
                 t.color[i] = color;
         }
     }
+    Texture* GetTexture() const { return _texture; }
+    void SetTexture(Texture* texture) { _texture = texture; }
+    void LoadTexture(const std::string& filename) {
+        _texture = new Texture(filename);
+    }
 
 private:
     glm::mat4 _transform;
     std::vector<Triangle> _triangles;
-
+    Texture* _texture;
 };

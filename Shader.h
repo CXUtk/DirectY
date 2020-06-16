@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <glm/glm.hpp>
-
+#include "Texture.h"
 struct fragment_shader_payload {
     fragment_shader_payload() {
     }
@@ -14,6 +14,7 @@ struct fragment_shader_payload {
     glm::vec3 color;
     glm::vec3 normal;
     glm::vec2 tex_coords;
+    Texture* texture;
 };
 class Shader {
 public:

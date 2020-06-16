@@ -30,14 +30,16 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
             _triangles.push_back(t);
         }
     }
-    _camera.SetPosition(glm::vec3(0, 5, 10));
+    _camera.SetPosition(glm::vec3(0, 5, -10));
+    _texture = new Texture("rock.png");
 }
 
 void Main::Run() {
     _rasterizer->Clear();
     static float rot = 0;
     Model m1(_triangles);
-    m1.SetTransform(glm::rotate(rot, glm::vec3(0, 0, 1)));
+    m1.SetTransform(glm::rotate(rot, glm::vec3(0, 0, 1)) * glm::scale(glm::vec3(2, 2, 2)));
+    m1.SetTexture(_texture);
     // rot += 0.1f;
     Model m2(_triangles);
     m2.SetTransform(glm::translate(glm::vec3(0, -4, 0)) * glm::scale(glm::vec3(5, 1, 5)));

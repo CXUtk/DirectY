@@ -155,19 +155,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     {
         switch (wParam) {
         case VK_LEFT: {
-            rasterizer->MoveCamera(glm::vec3(-1, 0, 0));
+            rasterizer->RotateCamera(-0.1f, glm::vec3(0, 1, 0));
             break;
         }
         case VK_RIGHT: {
-            rasterizer->MoveCamera(glm::vec3(1, 0, 0));
+            rasterizer->RotateCamera(0.1f, glm::vec3(0, 1, 0));
             break;
         }
         case VK_UP: {
-            rasterizer->MoveCamera(glm::vec3(0, 1, 0));
+            rasterizer->RotateCamera(-0.1f, glm::vec3(1, 0, 0));
             break;
         }
         case VK_DOWN: {
-            rasterizer->MoveCamera(glm::vec3(0, -1, 0));
+            rasterizer->RotateCamera(0.1f, glm::vec3(1, 0, 0));
             break;
         }
         }

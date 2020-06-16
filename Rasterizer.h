@@ -19,6 +19,7 @@ enum class DrawStyle {
 enum class SampleStyle {
     None,
     X2,
+    X4,
 };
 struct Light {
     Light() {}
@@ -76,16 +77,16 @@ private:
     Light _lights;
     fragment_shader _currentShader;
 
-
     void set_pixel(int x, int y, int id, const glm::vec3& color);
     void set_depth_shadow(int x, int y, int id, float depth);
     void set_pixel_alpha_blend(int x, int y, int id, const glm::vec3& color, float alpha);
     bool depth_test(int x, int y, int id, float depth);
     void draw_line(const glm::vec3& st, const glm::vec3& ed);
-    void raster_triangle(const Triangle& tmpTri, const glm::vec3* viewPos);
+    void raster_triangle(const Triangle& tmpTri, const glm::vec3* viewPos, Texture* texture);
     void raster_shadowmap(const Triangle& tmpTri);
     bool shadowmap_test(const glm::vec4& worldPos) const;
     void copy_to_frameBuffer();
+    void do_multi_sample(int K, const Triangle& t, const glm::vec3* viewPos, Texture* texture, int X, int Y);
 
     glm::vec3 shader_function(const fragment_shader_payload& info);
 };
