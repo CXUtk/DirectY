@@ -294,6 +294,17 @@ static float interpolate(float alpha, float beta, float gamma, float v1, float v
 }
 
 
+glm::vec3 sampleArea(const Triangle& t, int i, int j, Texture* texture, float wc, glm::vec2 texCoord) {
+    auto ip1 = computeBarycentric2D(glm::vec2(i + 1, j), t.vs);
+    auto ip2 = computeBarycentric2D(glm::vec2(i, j + 1), t.vs);
+    auto tex_coord1 = interpolate(ip1.x, ip1.y, ip1.z, t.tex_coords[0] / t.vs[0].w, t.tex_coords[1] / t.vs[1].w, t.tex_coords[2] / t.vs[2].w, 1) * wc;
+    tex_coord1 = glm::clamp(tex_coord1, 0.f, 1.f);
+    auto tex_coord2 = interpolate(ip2.x, ip2.y, ip2.z, t.tex_coords[0] / t.vs[0].w, t.tex_coords[1] / t.vs[1].w, t.tex_coords[2] / t.vs[2].w, 1) * wc;
+    tex_coord2 = glm::clamp(tex_coord2, 0.f, 1.f);
+    float L = std::max(glm::length(tex_coord1 - texCoord), glm::length(tex_coord2 - texCoord));
+    return texture->GetSquare(glm::clamp(texCoord - glm::vec2(L / 2, L / 2), 0.f, 1.f), L);
+}
+
 void Rasterizer::raster_triangle(const Triangle& t, const glm::vec3* viewPos, Texture* texture) {
     int minnX = _width - 1, minnY = _height - 1;
     int maxxX = 0, maxxY = 0;
@@ -325,6 +336,10 @@ void Rasterizer::raster_triangle(const Triangle& t, const glm::vec3* viewPos, Te
                         fragment_shader_payload info(interpolated_color, interpolated_normal, tex_coord);
                         info.view_pos = interpolated_shadingcoords;
                         info.texture = texture;
+                        if (texture) {
+                            info.texture = nullptr;
+                            info.color = sampleArea(t, i, j, texture, w_reciprocal, tex_coord);
+                        }
                         set_pixel(i, j, 0, _currentShader ? _currentShader(info) : shader_function(info));
                     }
                 }
@@ -452,9 +467,9 @@ void Rasterizer::do_multi_sample(int K, const Triangle& t, const glm::vec3* view
 
 glm::vec3 Rasterizer::shader_function(const fragment_shader_payload& info) {
 
-    glm::vec3 kd = info.texture ? (info.texture->GetBinlinearClamp(info.tex_coords.x, info.tex_coords.y)) : glm::vec3(1, 1, 1);
+    glm::vec3 kd = info.texture ? (info.texture->GetBinlinearClamp(info.tex_coords.x, info.tex_coords.y, 0)) : glm::vec3(1, 1, 1);
     glm::vec3 ka = glm::vec3(0.1, 0.1, 0.1) * kd;
-    glm::vec3 ks = glm::vec3(0.7f, 0.7f, 0.7f);
+    glm::vec3 ks = glm::vec3(0.4f, 0.4f, 0.4f);
     float amb_intensity = 0.5f;
 
     glm::vec3 normal = glm::normalize(info.normal);
@@ -477,7 +492,7 @@ glm::vec3 Rasterizer::shader_function(const fragment_shader_payload& info) {
         glm::vec3 specular = ks * std::pow(std::max(glm::dot(normal, h), 0.f), 256) * _lights.intensity / dis;
         finalLight += specular;
     }
-    return finalLight * info.color;
+    return /*finalLight * */info.color;
 }
 
 //glm::vec3 Rasterizer::shader_function(const fragment_shader_payload& info) {
