@@ -1,9 +1,11 @@
 ﻿// DirectY.cpp : 定义应用程序的入口点。
 //
 
-#include "framework.h"
+#include "framework/framework.h"
 #include "DirectY.h"
 #include "Main.h"
+#include <ctime>
+#include <cstdio>
 
 #define MAX_LOADSTRING 100
 
@@ -19,15 +21,15 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-Main* rasterizer;
+Main* renderer;
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPWSTR    lpCmdLine,
-    _In_ int       nCmdShow) {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+constexpr int WIDTH = 800;
+constexpr int HEIGHT = 600;
 
+
+
+int Wmain(HINSTANCE hInstance,
+    int nCmdShow) {
     // TODO: 在此处放置代码。
 
     // 初始化全局字符串
@@ -44,8 +46,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    rasterizer = new Main(hWnd, 800, 600);
+    renderer = new Main(hWnd, WIDTH, HEIGHT);
 
+
+    auto lastT = clock();
+    int cnt = 0;
     // 主消息循环:
     while (true) {
         GetMessage(&msg, nullptr, 0, 0);
@@ -53,11 +58,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        rasterizer->Run();
+        renderer->Run();
+        cnt++;
+        auto curtime = clock();
+        if (curtime - lastT > CLOCKS_PER_SEC) {
+            lastT = curtime;
+            printf("FPS: %d\n", cnt);
+            cnt = 0;
+        }
     }
 
     return (int)msg.wParam;
 }
+
+
+int main() {
+    return Wmain(GetModuleHandle(NULL), SW_NORMAL);
+}
+
 
 
 
@@ -100,7 +118,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     hInst = hInstance; // 将实例句柄存储在全局变量中
 
     hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
+        CW_USEDEFAULT, 0, WIDTH, HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd) {
         return FALSE;
@@ -146,32 +164,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         //HDC hdc = BeginPaint(hWnd, &ps);
         //FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
         //EndPaint(hWnd, &ps);
+        break;
     }
-    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
     case WM_KEYDOWN:
     {
-        switch (wParam) {
-        case VK_LEFT: {
-            rasterizer->RotateCamera(-0.1f, glm::vec3(0, 1, 0));
-            break;
-        }
-        case VK_RIGHT: {
-            rasterizer->RotateCamera(0.1f, glm::vec3(0, 1, 0));
-            break;
-        }
-        case VK_UP: {
-            rasterizer->RotateCamera(-0.1f, glm::vec3(1, 0, 0));
-            break;
-        }
-        case VK_DOWN: {
-            rasterizer->RotateCamera(0.1f, glm::vec3(1, 0, 0));
-            break;
-        }
-        }
+        /* switch (wParam) {
+         case VK_LEFT: {
+             rasterizer->RotateCamera(-0.1f, glm::vec3(0, 1, 0));
+             break;
+         }
+         case VK_RIGHT: {
+             rasterizer->RotateCamera(0.1f, glm::vec3(0, 1, 0));
+             break;
+         }
+         case VK_UP: {
+             rasterizer->RotateCamera(-0.1f, glm::vec3(1, 0, 0));
+             break;
+         }
+         case VK_DOWN: {
+             rasterizer->RotateCamera(0.1f, glm::vec3(1, 0, 0));
+             break;
+         }
+         }*/
 
+        break;
+    }
+    case WM_ERASEBKGND:
+    {
         break;
     }
     default:

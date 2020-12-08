@@ -92,7 +92,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -106,7 +106,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,37 +141,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="DirectY.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="lodepng.h" />
-    <ClInclude Include="Main.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="OBJ_Loader.h" />
-    <ClInclude Include="Rasterizer.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Triangle.h" />
+    <ClInclude Include="src\DirectY.h" />
+    <ClInclude Include="src\framework\framework.h" />
+    <ClInclude Include="src\framework\lodepng.h" />
+    <ClInclude Include="src\Main.h" />
+    <ClInclude Include="src\framework\Resource.h" />
+    <ClInclude Include="src\framework\targetver.h" />
+    <ClInclude Include="src\render\FrameBuffer.h" />
+    <ClInclude Include="src\render\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DirectY.cpp" />
-    <ClCompile Include="lodepng.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Rasterizer.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="src\DirectY.cpp" />
+    <ClCompile Include="src\framework\lodepng.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\render\FrameBuffer.cpp" />
+    <ClCompile Include="src\render\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DirectY.rc" />
+    <ResourceCompile Include="src\framework\DirectY.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="DirectY.ico" />
-    <Image Include="small.ico" />
+    <Image Include="src\framework\DirectY.ico" />
+    <Image Include="src\framework\small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="DirectY.aps" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

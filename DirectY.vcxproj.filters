@@ -15,86 +15,64 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
+    <ClInclude Include="src\Main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="src\framework\targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="src\framework\Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DirectY.h">
+    <ClInclude Include="src\framework\lodepng.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Main.h">
+    <ClInclude Include="src\framework\framework.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Rasterizer.h">
+    <ClInclude Include="src\DirectY.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Triangle.h">
+    <ClInclude Include="src\render\FrameBuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OBJ_Loader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="lodepng.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="src\render\Renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DirectY.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="src\framework\lodepng.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Rasterizer.cpp">
+    <ClCompile Include="src\DirectY.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Triangle.cpp">
+    <ClCompile Include="src\render\Renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="lodepng.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="src\render\FrameBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DirectY.rc">
+    <Image Include="src\framework\small.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="src\framework\DirectY.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\framework\DirectY.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="DirectY.ico">
-      <Filter>资源文件</Filter>
-    </Image>
+    <None Include="DirectY.aps" />
+    <None Include=".gitignore" />
+    <None Include=".gitattributes" />
   </ItemGroup>
 </Project>
