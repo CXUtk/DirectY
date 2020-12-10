@@ -48,7 +48,6 @@ int Wmain(HINSTANCE hInstance,
 
     renderer = new Main(hWnd, WIDTH, HEIGHT);
 
-
     auto lastT = clock();
     int cnt = 0;
     // 主消息循环:
@@ -97,7 +96,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance) {
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DIRECTY));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_DIRECTY);
+    wcex.lpszMenuName = NULL;
     wcex.lpszClassName = szWindowClass;
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -117,8 +116,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance) {
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     hInst = hInstance; // 将实例句柄存储在全局变量中
 
-    hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, WIDTH, HEIGHT, nullptr, nullptr, hInstance, nullptr);
+    RECT rect = { 0, 0, WIDTH, HEIGHT };
+    AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, 0, 0);
+
+    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        0, 0, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd) {
         return FALSE;
@@ -126,6 +128,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
+
 
     return TRUE;
 }

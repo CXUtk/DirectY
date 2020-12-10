@@ -13,5 +13,8 @@ private:
     HWND hWnd;
     int _width, _height;
 
+
+    int _vbuff;
+
     Renderer* _renderer;
 };

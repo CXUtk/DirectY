@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <glm/glm.hpp>
 
 struct Color {
     unsigned char R, G, B;
@@ -13,6 +14,8 @@ public:
     Color* GetBuffer() const { return _buffer; }
     int GetWidth() const { return _width; }
     int GetHeight() const { return _height; }
+
+    void Write(int x, int y, glm::vec3 color);
 
 private:
     Color* _buffer;

@@ -12,6 +12,17 @@ FrameBuffer::~FrameBuffer() {
 }
 
 void FrameBuffer::Clear() {
-    memset(_buffer, 0xaa, sizeof(Color) * _width * _height);
+    memset(_buffer, 0, sizeof(Color) * _width * _height);
     memset(_depthBuffer, 0, sizeof(float) * _width * _height);
+}
+
+void FrameBuffer::Write(int x, int y, glm::vec3 color) {
+    int r = y;
+    int c = x;
+
+    int idx = r * _width + c;
+
+    _buffer[idx].R = (unsigned char)(glm::clamp(color[2], 0.0f, 0.999f) * 256);
+    _buffer[idx].G = (unsigned char)(glm::clamp(color[1], 0.0f, 0.999f) * 256);
+    _buffer[idx].B = (unsigned char)(glm::clamp(color[0], 0.0f, 0.999f) * 256);
 }
