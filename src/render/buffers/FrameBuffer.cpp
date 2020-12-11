@@ -28,6 +28,8 @@ void FrameBuffer::Write(int x, int y, glm::vec3 color) {
     int r = y;
     int c = x;
 
+    if (r < 0 || r >= _height || c < 0 || c >= _width) return;
+
     int idx = r * _width + c;
     //if ((int)_buffer[idx].R + _buffer[idx].G + _buffer[idx].B > 0) {
     //    memset(&_buffer[idx], 0xff, sizeof(Color));
@@ -42,6 +44,7 @@ void FrameBuffer::Write(int x, int y, glm::vec3 color) {
 void FrameBuffer::WriteZBuffer(int x, int y, float z) {
     int r = y;
     int c = x;
+    if (r < 0 || r >= _height || c < 0 || c >= _width) return;
 
     int idx = r * _width + c;
     _depthBuffer[idx] = z;

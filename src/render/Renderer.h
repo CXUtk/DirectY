@@ -71,6 +71,9 @@ private:
 
     void inner_draw_triangle(Vertex vertices[3]);
     void inner_draw_line(Vertex vertices[2]);
+
     void rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3);
+    void bresenham(const Vertex* v1, const Vertex* v2);
+
     int homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numV);
 };

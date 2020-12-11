@@ -93,7 +93,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    rad += 0.005f;
+    // rad += 0.005f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
@@ -123,14 +123,25 @@ void Renderer::inner_draw_triangle(Vertex vertices[3]) {
         rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
 }
 
+
+
 void Renderer::inner_draw_line(Vertex vertices[2]) {
     int width = _frameBuffer->GetWidth();
     int height = _frameBuffer->GetHeight();
 
+
+    for (int i = 0; i < 2; i++) {
+        vertices[i].pos.x /= vertices[i].pos.w;
+        vertices[i].pos.y /= vertices[i].pos.w;
+        vertices[i].pos.z /= vertices[i].pos.w;
+    }
+
+
+    Vertex tmp[2];
+    memcpy(tmp, vertices, sizeof(tmp));
+
     glm::vec3 v1 = vertices[0].pos;
     glm::vec3 v2 = vertices[1].pos;
-    v1 /= vertices[0].pos.w;
-    v2 /= vertices[1].pos.w;
 
     glm::vec3 dir = v2 - v1;
 
@@ -149,6 +160,18 @@ void Renderer::inner_draw_line(Vertex vertices[2]) {
         if (tMin >= tMax) return;
     }
 
+    vertices[0].pos = glm::mix(tmp[0].pos, tmp[1].pos, tMin); // tmp[0].pos* (1 - tMin) + tmp[1].pos * tMin;
+    vertices[0].color = glm::mix(tmp[0].color, tmp[1].color, tMin);
+    vertices[0].texCoord = glm::mix(tmp[0].texCoord, tmp[1].texCoord, tMin);
+
+    vertices[1].pos = glm::mix(tmp[0].pos, tmp[1].pos, tMax);
+    vertices[1].color = glm::mix(tmp[0].color, tmp[1].color, tMax);
+    vertices[1].texCoord = glm::mix(tmp[0].texCoord, tmp[1].texCoord, tMax);
+
+    for (int i = 0; i < 2; i++)
+        viewPort_transform(vertices[i], width, height);
+
+    bresenham(&vertices[0], &vertices[1]);
 }
 
 void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
@@ -225,13 +248,61 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
         }
     }
 }
+void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
+    glm::ivec2 start(v1->pos.x + 0.5, v1->pos.y + 0.5), end(v2->pos.x + 0.5, v2->pos.y + 0.5);
+
+    bool swp = false;
+    int dx = end.x - start.x, dy = end.y - start.y;
+    int yInc = 1;
+    if (abs(dx) < abs(dy)) {
+        std::swap(dx, dy);
+        std::swap(start.x, start.y);
+        std::swap(end.x, end.y);
+        swp = true;
+    }
+    if (dx < 0) {
+        std::swap(start.x, end.x);
+        std::swap(start.y, end.y);
+        dx *= -1, dy *= -1;
+        std::swap(v1, v2);
+    }
+    if (dy < 0) {
+        yInc = -1;
+        dy *= -1;
+    }
+    int a = 2 * dy, b = 2 * (dy - dx);
+    int cur = 2 * dy - dx;
+
+    glm::vec4 posM[2] = { v1->pos / v1->pos.w, v2->pos / v2->pos.w };
+    glm::vec3 colorM[2] = { v1->color / v1->pos.w, v2->color / v2->pos.w };
+    glm::vec2 texCoord[2] = { v1->texCoord / v1->pos.w, v2->texCoord / v2->pos.w };
+    for (int i = start.x, j = start.y; i <= end.x; i++) {
+        float t = i / (float)(end.x - start.x);
+        float z = 1 / ((1 - t) / v1->pos.w + t / v2->pos.w);
+        if (swp) {
+            _frameBuffer->Write(j, i, glm::mix(colorM[0], colorM[1], t) * z);/*fragment_shader(position, color, texCoord)*/
+            _frameBuffer->WriteZBuffer(j, i, z);
+        }
+        else {
+            _frameBuffer->Write(i, j, glm::mix(colorM[0], colorM[1], t) * z);
+            _frameBuffer->WriteZBuffer(i, j, 1);
+        }
+        if (cur <= 0) {
+            cur += a;
+        }
+        else {
+            j += yInc;
+            cur += b;
+        }
+    }
+}
 int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numVertices) {
     *numVertices = 3;
     memcpy(output, input, sizeof(Vertex) * 3);
     for (int i = 0; i < *numVertices; i++) {
-        output[i].pos.x /= output[i].pos.w;
-        output[i].pos.y /= output[i].pos.w;
-        output[i].pos.z /= output[i].pos.w;
+        output[i].pos.x /= input[i].pos.w;
+        output[i].pos.y /= input[i].pos.w;
+        output[i].pos.z /= input[i].pos.w;
     }
     for (int i = 0; i < 3; i++) indices[i] = i;
     return 3;
