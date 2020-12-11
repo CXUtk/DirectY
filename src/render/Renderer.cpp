@@ -151,12 +151,13 @@ void Renderer::rasterize(Vertex vertices[3]) {
             glm::vec2 uv = interpTransform * (pos - v[0]);
             glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
             float z = 1 / (interp.x / vertices[0].pos.w + interp.y / vertices[1].pos.w + interp.z / vertices[2].pos.w);
+            interp *= z;
             // Check -z because the default depth is 0
             if (z > _frameBuffer->GetZBuffer(i, j)) continue;
 
-            glm::vec3 color = colorMat * interp * z;
-            glm::vec3 position = posMat * interp * z;
-            glm::vec2 texCoord = texMat * interp * z;
+            glm::vec3 color = colorMat * interp;
+            glm::vec3 position = posMat * interp;
+            glm::vec2 texCoord = texMat * interp;
             //if (i == 300 && j == 374) {
             //    printf("%lf %lf %lf\n", a, b, c);
             //}
