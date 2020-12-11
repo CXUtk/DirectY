@@ -14,7 +14,7 @@ private:
     int _width, _height;
 
 
-    int _vbuff;
+    int _vbuff, _vbuff2;
 
     Renderer* _renderer;
 };

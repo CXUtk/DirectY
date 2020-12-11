@@ -49,14 +49,11 @@ int Wmain(HINSTANCE hInstance,
     renderer = new Main(hWnd, WIDTH, HEIGHT);
 
     auto lastT = clock();
+    auto lastFrameTime = clock();
     int cnt = 0;
     // 主消息循环:
     while (true) {
-        GetMessage(&msg, nullptr, 0, 0);
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+
         renderer->Run();
         cnt++;
         auto curtime = clock();
@@ -65,6 +62,14 @@ int Wmain(HINSTANCE hInstance,
             printf("FPS: %d\n", cnt);
             cnt = 0;
         }
+        do {
+            GetMessage(&msg, nullptr, 0, 0);
+            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        } while (clock() - lastFrameTime < 16);
+        lastFrameTime = clock();
     }
 
     return (int)msg.wParam;

@@ -12,8 +12,9 @@
 struct Vertex {
     glm::vec4 pos;
     glm::vec3 color;
-    Vertex() {}
-    Vertex(glm::vec4 pos, glm::vec3 color) :pos(pos), color(color) {}
+    glm::vec2 texCoord;
+    Vertex() : pos(0), color(0), texCoord(0) {}
+    Vertex(glm::vec4 pos, glm::vec3 color, glm::vec2 texCoord) :pos(pos), color(color), texCoord(texCoord) {}
 };
 
 

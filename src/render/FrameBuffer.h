@@ -14,8 +14,10 @@ public:
     Color* GetBuffer() const { return _buffer; }
     int GetWidth() const { return _width; }
     int GetHeight() const { return _height; }
+    float GetZBuffer(int x, int y) const;
 
     void Write(int x, int y, glm::vec3 color);
+    void WriteZBuffer(int x, int y, float z);
 
 private:
     Color* _buffer;
