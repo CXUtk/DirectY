@@ -33,16 +33,19 @@
     <ClInclude Include="src\DirectY.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\FrameBuffer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\Renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\VertexBuffer.h">
+    <ClInclude Include="src\render\shaders\VertexShader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\shaders\VertexShader.h">
+    <ClInclude Include="src\render\buffers\FrameBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\buffers\VertexBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\buffers\IndexBuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,10 +62,13 @@
     <ClCompile Include="src\render\Renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\FrameBuffer.cpp">
+    <ClCompile Include="src\render\buffers\FrameBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\VertexBuffer.cpp">
+    <ClCompile Include="src\render\buffers\VertexBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\buffers\IndexBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

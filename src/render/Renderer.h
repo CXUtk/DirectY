@@ -6,8 +6,16 @@
 #include <vector>
 #include <Windows.h>
 
-#include "FrameBuffer.h"
-#include "VertexBuffer.h"
+#include "buffers/FrameBuffer.h"
+#include "buffers/VertexBuffer.h"
+#include "buffers/IndexBuffer.h"
+
+
+enum class Primitives {
+    Points,
+    Lines,
+    Triangles,
+};
 
 struct Vertex {
     glm::vec4 pos;
@@ -40,14 +48,28 @@ public:
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="size"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    int CreateIndexBuffer(size_t size, void* data);
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="vbuff"></param>
     /// <param name="offset"></param>
-    /// <param name="size">Number of objects from offset to draw</param>
-    void Draw(int vbuff, size_t offset, size_t size);
+    /// <param name="size">Number of objects to draw from offset</param>
+    void DrawElements(int vbuff, size_t offset, size_t size, Primitives primType);
+
+    void DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff);
 
 private:
     FrameBuffer* _frameBuffer;
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
+    std::vector<std::shared_ptr<IndexBuffer>> _indexBuffers;
 
-    void rasterize(Vertex vertices[3]);
+    void inner_draw_triangle(Vertex vertices[3]);
+    void inner_draw_line(Vertex vertices[2]);
+    void rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3);
+    int homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numV);
 };

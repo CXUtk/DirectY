@@ -28,7 +28,7 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
 
 void Main::Run() {
     _renderer->ClearFrameBuffer();
-    _renderer->Draw(_vbuff, 0, 6);
-    _renderer->Draw(_vbuff2, 0, 3);
+    _renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
+    _renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
     _renderer->Present(hWnd);
 }

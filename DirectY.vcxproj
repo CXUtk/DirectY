@@ -153,18 +153,20 @@
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\framework\Resource.h" />
     <ClInclude Include="src\framework\targetver.h" />
-    <ClInclude Include="src\render\FrameBuffer.h" />
+    <ClInclude Include="src\render\buffers\FrameBuffer.h" />
+    <ClInclude Include="src\render\buffers\IndexBuffer.h" />
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\render\shaders\VertexShader.h" />
-    <ClInclude Include="src\render\VertexBuffer.h" />
+    <ClInclude Include="src\render\buffers\VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />
     <ClCompile Include="src\framework\lodepng.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\render\FrameBuffer.cpp" />
+    <ClCompile Include="src\render\buffers\FrameBuffer.cpp" />
+    <ClCompile Include="src\render\buffers\IndexBuffer.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
-    <ClCompile Include="src\render\VertexBuffer.cpp" />
+    <ClCompile Include="src\render\buffers\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\framework\DirectY.rc" />
