@@ -155,6 +155,8 @@
     <ClInclude Include="src\framework\targetver.h" />
     <ClInclude Include="src\render\buffers\FrameBuffer.h" />
     <ClInclude Include="src\render\buffers\IndexBuffer.h" />
+    <ClInclude Include="src\render\device\GDIDevice.h" />
+    <ClInclude Include="src\render\device\GraphicDevice.h" />
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\render\shaders\VertexShader.h" />
     <ClInclude Include="src\render\buffers\VertexBuffer.h" />
@@ -165,6 +167,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\render\buffers\FrameBuffer.cpp" />
     <ClCompile Include="src\render\buffers\IndexBuffer.cpp" />
+    <ClCompile Include="src\render\device\GDIDevice.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\render\buffers\VertexBuffer.cpp" />
   </ItemGroup>

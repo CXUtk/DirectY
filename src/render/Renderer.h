@@ -4,12 +4,11 @@
 #include <glm/gtx/transform.hpp>
 #include <memory>
 #include <vector>
-#include <Windows.h>
 
+#include "device/GraphicDevice.h"
 #include "buffers/FrameBuffer.h"
 #include "buffers/VertexBuffer.h"
 #include "buffers/IndexBuffer.h"
-
 
 enum class Primitives {
     Points,
@@ -28,13 +27,14 @@ struct Vertex {
 
 class Renderer {
 public:
-    Renderer(int width, int height);
+    Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphicDevice);
+    ~Renderer();
 
     void SetFrameBuffer(FrameBuffer* frameBuffer) { _frameBuffer = frameBuffer; }
 
     void ClearFrameBuffer();
 
-    void Present(HWND hwnd);
+    void Present();
 
     /// <summary>
     /// Create a vertex buffer
@@ -67,6 +67,7 @@ private:
     FrameBuffer* _frameBuffer;
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
     std::vector<std::shared_ptr<IndexBuffer>> _indexBuffers;
+    std::shared_ptr<GraphicDevice> _graphicDevice;
 
     void inner_draw_triangle(Vertex vertices[3]);
     void inner_draw_line(Vertex vertices[2]);

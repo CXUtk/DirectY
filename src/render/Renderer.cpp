@@ -10,10 +10,6 @@ void vertex_shader(Vertex& vertex) {
 }
 
 void viewPort_transform(Vertex& vertex, int width, int height) {
-    vertex.pos.x /= vertex.pos.w;
-    vertex.pos.y /= vertex.pos.w;
-    vertex.pos.z /= vertex.pos.w;
-
     float x = vertex.pos.x;
     float y = vertex.pos.y;
     vertex.pos.x = (x * 0.5 + 0.5) * width;
@@ -30,8 +26,13 @@ glm::vec3 fragment_shader(const glm::vec3& pos, const glm::vec3& color, const gl
 }
 
 
-Renderer::Renderer(int width, int height) {
+Renderer::Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphicDevice) {
     _frameBuffer = new FrameBuffer(width, height);
+    _graphicDevice = graphicDevice;
+}
+
+Renderer::~Renderer() {
+    delete _frameBuffer;
 }
 
 void Renderer::ClearFrameBuffer() {
@@ -39,22 +40,8 @@ void Renderer::ClearFrameBuffer() {
 }
 
 
-void Renderer::Present(HWND hwnd) {
-    int width = _frameBuffer->GetWidth();
-    int height = _frameBuffer->GetHeight();
-
-    HDC hdc = GetDC(hwnd);
-    BITMAPINFO info;
-    ZeroMemory(&info, sizeof(BITMAPINFO));
-    info.bmiHeader.biBitCount = 24;
-    info.bmiHeader.biWidth = width;
-    info.bmiHeader.biHeight = height;
-    info.bmiHeader.biPlanes = 1;
-    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    info.bmiHeader.biSizeImage = 0;
-    info.bmiHeader.biCompression = BI_RGB;
-    StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, _frameBuffer->GetBuffer(), &info, DIB_RGB_COLORS, SRCCOPY);
-    ReleaseDC(hwnd, hdc);
+void Renderer::Present() {
+    _graphicDevice->Present(_frameBuffer);
 }
 
 int Renderer::CreateVertexBuffer(size_t size, size_t sizePerVertex, void* data) {
@@ -137,6 +124,31 @@ void Renderer::inner_draw_triangle(Vertex vertices[3]) {
 }
 
 void Renderer::inner_draw_line(Vertex vertices[2]) {
+    int width = _frameBuffer->GetWidth();
+    int height = _frameBuffer->GetHeight();
+
+    glm::vec3 v1 = vertices[0].pos;
+    glm::vec3 v2 = vertices[1].pos;
+    v1 /= vertices[0].pos.w;
+    v2 /= vertices[1].pos.w;
+
+    glm::vec3 dir = v2 - v1;
+
+    glm::vec3 minn = glm::vec3(-1);
+    glm::vec3 maxx = glm::vec3(1);
+
+    // Homogenous space clip of lines, range from [-1, 1]
+    float tMin = 0.0f, tMax = 1.0f;
+    for (int i = 0; i < 3; i++) {
+        float invD = 1.0f / dir[i];
+        float t0 = (minn[i] - v1[i]) * invD;
+        float t1 = (maxx[i] - v1[i]) * invD;
+        if (invD < 0) std::swap(t0, t1);
+        tMin = std::max(tMin, t0);
+        tMax = std::min(tMax, t1);
+        if (tMin >= tMax) return;
+    }
+
 }
 
 void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
@@ -147,20 +159,20 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     glm::ivec2 minnpos = glm::ivec2(v1.pos.x, v1.pos.y);
     glm::ivec2 maxxpos = glm::ivec2(v1.pos.x + 0.5, v1.pos.y + 0.5);
 
-    minnpos.x = min(minnpos.x, (int)v2.pos.x);
-    maxxpos.x = max(maxxpos.x, (int)(v2.pos.x + 0.5));
-    minnpos.y = min(minnpos.y, (int)v2.pos.y);
-    maxxpos.y = max(maxxpos.y, (int)(v2.pos.y + 0.5));
+    minnpos.x = std::min(minnpos.x, (int)v2.pos.x);
+    maxxpos.x = std::max(maxxpos.x, (int)(v2.pos.x + 0.5));
+    minnpos.y = std::min(minnpos.y, (int)v2.pos.y);
+    maxxpos.y = std::max(maxxpos.y, (int)(v2.pos.y + 0.5));
 
-    minnpos.x = min(minnpos.x, (int)v3.pos.x);
-    maxxpos.x = max(maxxpos.x, (int)(v3.pos.x + 0.5));
-    minnpos.y = min(minnpos.y, (int)v3.pos.y);
-    maxxpos.y = max(maxxpos.y, (int)(v3.pos.y + 0.5));
+    minnpos.x = std::min(minnpos.x, (int)v3.pos.x);
+    maxxpos.x = std::max(maxxpos.x, (int)(v3.pos.x + 0.5));
+    minnpos.y = std::min(minnpos.y, (int)v3.pos.y);
+    maxxpos.y = std::max(maxxpos.y, (int)(v3.pos.y + 0.5));
 
-    minnpos.x = max(minnpos.x, 0);
-    minnpos.y = max(minnpos.y, 0);
-    maxxpos.x = min(maxxpos.x, width);
-    maxxpos.y = min(maxxpos.y, height);
+    minnpos.x = std::max(minnpos.x, 0);
+    minnpos.y = std::max(minnpos.y, 0);
+    maxxpos.x = std::min(maxxpos.x, width);
+    maxxpos.y = std::min(maxxpos.y, height);
 
     glm::vec2 v[3];
 
@@ -214,8 +226,13 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     }
 }
 int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numVertices) {
-    memcpy(output, input, sizeof(Vertex) * 3);
-    for (int i = 0; i < 3; i++)indices[i] = i;
     *numVertices = 3;
+    memcpy(output, input, sizeof(Vertex) * 3);
+    for (int i = 0; i < *numVertices; i++) {
+        output[i].pos.x /= output[i].pos.w;
+        output[i].pos.y /= output[i].pos.w;
+        output[i].pos.z /= output[i].pos.w;
+    }
+    for (int i = 0; i < 3; i++) indices[i] = i;
     return 3;
 }
