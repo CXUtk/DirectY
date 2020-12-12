@@ -31,7 +31,7 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
     };
 
     ObjLoader loader;
-    loader.load("models/gd32.obj");
+    loader.load("models/cube.obj");
     _numVertices = loader.Vertices.size();
     _numFaces = loader.Triangles.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * loader.Vertices.size(), sizeof(Vertex), loader.Vertices.data());
@@ -44,10 +44,10 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
 
 void Main::Run() {
     _renderer->ClearFrameBuffer();
-    _renderer->SetDrawMode(DrawMode::WireFrame);
-    //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
-    //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
-    //_renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
+    //_renderer->SetDrawMode(DrawMode::WireFrame);
+    _renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
+    _renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
+    _renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
     _renderer->DrawElementsWithIndex(_modelBuff, 0, 3 * _numVertices, Primitives::Triangles, _modelBuff1);
     _renderer->Present();
 }

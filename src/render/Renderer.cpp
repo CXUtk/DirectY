@@ -30,6 +30,7 @@ Renderer::Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphic
     _frameBuffer = new FrameBuffer(width, height);
     _graphicDevice = graphicDevice;
     _drawMode = DrawMode::Fill;
+    _cullMode = CullMode::None;
 }
 
 Renderer::~Renderer() {
@@ -262,11 +263,26 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
             float b = cross2d(t[1], pos - v[1]);
             float c = cross2d(t[2], pos - v[2]);
 
+            int jud = 0;
+            if (a > 0) jud |= 1;
+            if (b > 0) jud |= 2;
+            if (c > 0) jud |= 4;
+
             // Top-Left Rule
-            bool b1 = (a > 0 || (a == 0 && isTopLeftEdge(t[0])));
-            bool b2 = (b > 0 || (b == 0 && isTopLeftEdge(t[1])));
-            bool b3 = (c > 0 || (c == 0 && isTopLeftEdge(t[2])));
-            bool inside = b1 && b2 && b3;
+            bool b1 = (a != 0 || (a == 0 && isTopLeftEdge(t[0])));
+            bool b2 = (b != 0 || (b == 0 && isTopLeftEdge(t[1])));
+            bool b3 = (c != 0 || (c == 0 && isTopLeftEdge(t[2])));
+            bool inside = (b1 && b2 && b3);
+
+            if (_cullMode == CullMode::None) {
+                inside &= (jud == 0 || jud == 7);
+            }
+            else if (_cullMode == CullMode::CullClockwise) {
+                inside &= (jud == 7);
+            }
+            else {
+                inside &= (jud == 0);
+            }
 
             // Barycentric calculation
             if (!inside) continue;

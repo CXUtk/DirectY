@@ -21,6 +21,12 @@ enum class DrawMode {
     Fill,
 };
 
+enum class CullMode {
+    None,
+    CullClockwise,
+    CullCounterClockwise,
+};
+
 struct Vertex {
     glm::vec4 pos;
     glm::vec3 color;
@@ -76,6 +82,7 @@ private:
     std::shared_ptr<GraphicDevice> _graphicDevice;
 
     DrawMode _drawMode;
+    CullMode _cullMode;
 
     void inner_draw_triangle(Vertex vertices[3]);
     void inner_draw_line(Vertex vertices[2]);
