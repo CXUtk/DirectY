@@ -159,14 +159,8 @@ void Renderer::inner_draw_line(Vertex vertices[2]) {
         tMax = std::min(tMax, t1);
         if (tMin >= tMax) return;
     }
-
-    vertices[0].pos = glm::mix(tmp[0].pos, tmp[1].pos, tMin); // tmp[0].pos* (1 - tMin) + tmp[1].pos * tMin;
-    vertices[0].color = glm::mix(tmp[0].color, tmp[1].color, tMin);
-    vertices[0].texCoord = glm::mix(tmp[0].texCoord, tmp[1].texCoord, tMin);
-
-    vertices[1].pos = glm::mix(tmp[0].pos, tmp[1].pos, tMax);
-    vertices[1].color = glm::mix(tmp[0].color, tmp[1].color, tMax);
-    vertices[1].texCoord = glm::mix(tmp[0].texCoord, tmp[1].texCoord, tMax);
+    vertices[0] = linear_interpolation(tmp[0], tmp[1], tMin);
+    vertices[1] = linear_interpolation(tmp[0], tmp[1], tMax);
 
     for (int i = 0; i < 2; i++)
         viewPort_transform(vertices[i], width, height);
@@ -306,4 +300,20 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int* 
     }
     for (int i = 0; i < 3; i++) indices[i] = i;
     return 3;
+}
+
+Vertex Renderer::linear_interpolation(const Vertex& v1, const Vertex& v2, float t) const {
+    Vertex v;
+    v.pos = glm::mix(v1.pos, v2.pos, t); // tmp[0].pos* (1 - tMin) + tmp[1].pos * tMin;
+    v.color = glm::mix(v1.color, v2.color, t);
+    v.texCoord = glm::mix(v1.texCoord, v2.texCoord, t);
+    return v;
+}
+
+Vertex Renderer::barycentric_interpolation(const Vertex& v1, const Vertex& v2, const Vertex& v3, const glm::vec3& bary) const {
+    Vertex v;
+    v.pos = v1.pos * bary.x + v2.pos * bary.y + v3.pos * bary.z;
+    v.color = v1.color * bary.x + v2.color * bary.y + v3.color * bary.z;
+    v.texCoord = v1.texCoord * bary.x + v2.texCoord * bary.y + v3.texCoord * bary.z;
+    return v;
 }

@@ -76,4 +76,7 @@ private:
     void bresenham(const Vertex* v1, const Vertex* v2);
 
     int homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numV);
+
+    Vertex linear_interpolation(const Vertex& v1, const Vertex& v2, float t) const;
+    Vertex barycentric_interpolation(const Vertex& v1, const Vertex& v2, const Vertex& v3, const glm::vec3& bary) const;
 };
