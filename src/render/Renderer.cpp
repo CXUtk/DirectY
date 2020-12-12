@@ -29,6 +29,7 @@ glm::vec3 fragment_shader(const glm::vec3& pos, const glm::vec3& color, const gl
 Renderer::Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphicDevice) {
     _frameBuffer = new FrameBuffer(width, height);
     _graphicDevice = graphicDevice;
+    _drawMode = DrawMode::Fill;
 }
 
 Renderer::~Renderer() {
@@ -93,13 +94,11 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    // rad += 0.005f;
+    rad += 0.005f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
 }
-
-
 
 
 bool isTopLeftEdge(glm::vec2 v) {
@@ -119,8 +118,16 @@ void Renderer::inner_draw_triangle(Vertex vertices[3]) {
     int numIdx = homo_clipping(vertices, V, indices, &numV);
     for (int i = 0; i < numV; i++)
         viewPort_transform(V[i], width, height);
-    for (int i = 0; i < numIdx; i += 3)
-        rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
+    for (int i = 0; i < numIdx; i += 3) {
+        if (_drawMode == DrawMode::Fill) {
+            rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
+        }
+        else if (_drawMode == DrawMode::WireFrame) {
+            for (int j = 0; j < 3; j++) {
+                bresenham(&V[indices[i + j]], &V[indices[i + (j + 1) % 3]]);
+            }
+        }
+    }
 }
 
 
@@ -271,15 +278,19 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
     glm::vec3 colorM[2] = { v1->color / v1->pos.w, v2->color / v2->pos.w };
     glm::vec2 texCoord[2] = { v1->texCoord / v1->pos.w, v2->texCoord / v2->pos.w };
     for (int i = start.x, j = start.y; i <= end.x; i++) {
-        float t = i / (float)(end.x - start.x);
+        float t = (i - start.x) / (float)(end.x - start.x);
         float z = 1 / ((1 - t) / v1->pos.w + t / v2->pos.w);
         if (swp) {
-            _frameBuffer->Write(j, i, glm::mix(colorM[0], colorM[1], t) * z);/*fragment_shader(position, color, texCoord)*/
-            _frameBuffer->WriteZBuffer(j, i, z);
+            if (_frameBuffer->GetZBuffer(j, i) >= z) {
+                _frameBuffer->Write(j, i, glm::mix(colorM[0], colorM[1], t) * z);/*fragment_shader(position, color, texCoord)*/
+                _frameBuffer->WriteZBuffer(j, i, z);
+            }
         }
         else {
-            _frameBuffer->Write(i, j, glm::mix(colorM[0], colorM[1], t) * z);
-            _frameBuffer->WriteZBuffer(i, j, 1);
+            if (_frameBuffer->GetZBuffer(i, j) >= z) {
+                _frameBuffer->Write(i, j, glm::mix(colorM[0], colorM[1], t) * z);
+                _frameBuffer->WriteZBuffer(i, j, z);
+            }
         }
         if (cur <= 0) {
             cur += a;

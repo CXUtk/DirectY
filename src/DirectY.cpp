@@ -68,7 +68,7 @@ int Wmain(HINSTANCE hInstance,
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-        } while (/*clock() - lastFrameTime < 16*/ false);
+        } while (clock() - lastFrameTime < 16);
         lastFrameTime = clock();
     }
 

@@ -19,6 +19,7 @@ void FrameBuffer::Clear() {
 float FrameBuffer::GetZBuffer(int x, int y) const {
     int r = y;
     int c = x;
+    if (r < 0 || r >= _height || c < 0 || c >= _width) return 0;
 
     int idx = r * _width + c;
     return _depthBuffer[idx];

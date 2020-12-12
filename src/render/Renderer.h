@@ -16,6 +16,11 @@ enum class Primitives {
     Triangles,
 };
 
+enum class DrawMode {
+    WireFrame,
+    Fill,
+};
+
 struct Vertex {
     glm::vec4 pos;
     glm::vec3 color;
@@ -31,6 +36,7 @@ public:
     ~Renderer();
 
     void SetFrameBuffer(FrameBuffer* frameBuffer) { _frameBuffer = frameBuffer; }
+    void SetDrawMode(DrawMode drawMode) { _drawMode = drawMode; }
 
     void ClearFrameBuffer();
 
@@ -68,6 +74,8 @@ private:
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
     std::vector<std::shared_ptr<IndexBuffer>> _indexBuffers;
     std::shared_ptr<GraphicDevice> _graphicDevice;
+
+    DrawMode _drawMode;
 
     void inner_draw_triangle(Vertex vertices[3]);
     void inner_draw_line(Vertex vertices[2]);
