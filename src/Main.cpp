@@ -3,6 +3,8 @@
 #include <glm/gtx/transform.hpp>
 #include <vector>
 
+#include "resource/ObjLoader.h"
+
 
 Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height(height) {
     _renderer = new Renderer(width, height, std::make_shared<GDIDevice>(hwnd));
@@ -28,6 +30,13 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
         Vertex(glm::vec4(-1, -1, 0, 1), glm::vec3(1, 1, 0), glm::vec2(0, 0)),
     };
 
+    ObjLoader loader;
+    loader.load("models/gd32.obj");
+    _numVertices = loader.Vertices.size();
+    _numFaces = loader.Triangles.size();
+    _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * loader.Vertices.size(), sizeof(Vertex), loader.Vertices.data());
+    _modelBuff1 = _renderer->CreateIndexBuffer(sizeof(unsigned int) * 3 * loader.Triangles.size(), loader.Triangles.data());
+
     _vbuff = _renderer->CreateVertexBuffer(sizeof(triangle), sizeof(Vertex), &triangle);
     _vbuff2 = _renderer->CreateVertexBuffer(sizeof(triangle2), sizeof(Vertex), &triangle2);
     _vbuff3 = _renderer->CreateVertexBuffer(sizeof(lines), sizeof(Vertex), &lines);
@@ -35,9 +44,10 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
 
 void Main::Run() {
     _renderer->ClearFrameBuffer();
-    //_renderer->SetDrawMode(DrawMode::WireFrame);
-    _renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
-    _renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
-    _renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
+    _renderer->SetDrawMode(DrawMode::WireFrame);
+    //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
+    //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
+    //_renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
+    _renderer->DrawElementsWithIndex(_modelBuff, 0, 3 * _numVertices, Primitives::Triangles, _modelBuff1);
     _renderer->Present();
 }

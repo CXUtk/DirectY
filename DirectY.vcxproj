@@ -160,6 +160,7 @@
     <ClInclude Include="src\render\Renderer.h" />
     <ClInclude Include="src\render\shaders\VertexShader.h" />
     <ClInclude Include="src\render\buffers\VertexBuffer.h" />
+    <ClInclude Include="src\resource\ObjLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\render\device\GDIDevice.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\render\buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\resource\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\framework\DirectY.rc" />

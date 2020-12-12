@@ -5,7 +5,7 @@
 static float rad = 0.0;
 void vertex_shader(Vertex& vertex) {
     static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 0.75f, 0.5f, 100.f);
+    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 2, 800.f / 600.f, 0.5f, 100.f);
     vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(1, 0, 0)) * vertex.pos;
 }
 
@@ -51,7 +51,7 @@ int Renderer::CreateVertexBuffer(size_t size, size_t sizePerVertex, void* data) 
 }
 
 int Renderer::CreateIndexBuffer(size_t size, void* data) {
-    _indexBuffers.push_back(std::make_shared<IndexBuffer>(size, data));
+    _indexBuffers.push_back(std::make_shared<IndexBuffer>(size, (unsigned int*)data));
     return _indexBuffers.size() - 1;
 }
 
@@ -94,10 +94,48 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    rad += 0.005f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
+    auto vBuffer = _vertexBuffers[vBuff];
+    auto iBuffer = _indexBuffers[idBuff];
+
+    auto sizePerVertex = vBuffer->getSizePerVertex();
+    auto buffer = vBuffer->getBuffer();
+
+    auto viewPortWidth = _frameBuffer->GetWidth();
+    auto viewPortHeight = _frameBuffer->GetHeight();
+
+    auto idArray = iBuffer->getBuffer();
+    switch (primType) {
+    case Primitives::Triangles: {
+        for (int i = 0; i < iBuffer->getSize(); i += 3) {
+            Vertex V[3];
+            for (int j = 0; j < 3; j++) {
+                memcpy(&V[j], buffer + (idArray[i + j]) * sizePerVertex, sizePerVertex);
+                V[j].pos.w = 1.0f;
+                vertex_shader(V[j]);
+            }
+            inner_draw_triangle(V);
+        }
+        break;
+    }
+    case Primitives::Lines: {
+        for (int i = offset; i < size; i += 2) {
+            Vertex V[2];
+            for (int j = 0; j < 2; j++) {
+                memcpy(&V[j], buffer + (idArray[i + j]) * sizePerVertex, sizePerVertex);
+                V[j].pos.w = 1.0f;
+                vertex_shader(V[j]);
+            }
+            inner_draw_line(V);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    rad += 0.005f;
 }
 
 

@@ -54,6 +54,9 @@
     <ClInclude Include="src\render\device\GDIDevice.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource\ObjLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -78,6 +81,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\render\device\GDIDevice.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resource\ObjLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

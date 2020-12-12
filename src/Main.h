@@ -15,6 +15,8 @@ private:
 
 
     int _vbuff, _vbuff2, _vbuff3;
+    int _modelBuff, _modelBuff1;
+    int _numVertices, _numFaces;
 
     Renderer* _renderer;
 };
