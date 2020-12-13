@@ -10,13 +10,13 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
     _renderer = new Renderer(width, height, std::make_shared<GDIDevice>(hwnd));
 
     Vertex triangle[6] = {
-        Vertex(glm::vec4(-2, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
+        Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
         Vertex(glm::vec4(-0.5, -0.5, 0, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1)),
         Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 1)),
 
         Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
         Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 1)),
-        Vertex(glm::vec4(2, 0.5, 0, 1), glm::vec3(1, 1, 0), glm::vec2(1, 0))
+        Vertex(glm::vec4(0.5, 0.5, 0, 1), glm::vec3(1, 1, 0), glm::vec2(1, 0))
     };
 
     Vertex triangle2[3] = {

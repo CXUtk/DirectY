@@ -3,18 +3,22 @@
 #include <algorithm>
 
 
-static float rad = 0.0;
+static float rad = 3.0;
 void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
-    vertex.pos = /*proj * view **/ glm::rotate(-rad, glm::vec3(0, 0, 1)) * vertex.pos;
+    vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(0, 0, 1)) * vertex.pos;
 }
 
 void viewPort_transform(Vertex& vertex, int width, int height) {
+
     float x = vertex.pos.x;
     float y = vertex.pos.y;
-    vertex.pos.x = (x * 0.5 + 0.5) * width;
-    vertex.pos.y = (y * 0.5 + 0.5) * height;
+    vertex.pos.x = std::max(std::min((x * 0.5f + 0.5f), 0.999f), 0.f) * width;
+    vertex.pos.y = std::max(std::min((y * 0.5f + 0.5f), 0.999f), 0.f) * height;
+
+    assert(vertex.pos.x >= 0 && vertex.pos.x <= width);
+    assert(vertex.pos.y >= 0 && vertex.pos.y <= height);
 }
 
 glm::vec3 fragment_shader(const glm::vec3& pos, const glm::vec3& color, const glm::vec2& texCoord) {
@@ -378,15 +382,23 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
         glm::vec3 parameter;
         if (plane_segment_intersection(cubeSeg[i], initial[0], initial[1], initial[2], parameter)) {
             if (parameter.z == 0 || parameter.z == 1) continue;
+
             points.push_back(glm::vec2(parameter.x, parameter.y));
         }
     }
     // 如果是非退化情况，将此凸多边形和三角形进行半平面交剪裁
     if (points.size() >= 3) {
-        glm::vec2 origin(0, 0);
+
+        std::sort(points.begin(), points.end(), [](glm::vec2 a, glm::vec2 b) {
+            return a.y < b.y || (a.y == b.y && a.x < b.x);
+            });
+        glm::vec2 origin = points[0];
         std::sort(points.begin(), points.end(), [=](glm::vec2 a, glm::vec2 b) {
             return cross2d(a - origin, b - origin) > 0;
             });
+        //for (auto p : points) {
+        //    printf("%lf %lf\n", p.x, p.y);
+        //}
         points = cut_polygon(points, LineSegment2D(glm::vec2(0, 0), glm::vec2(1, 0)));
         points = cut_polygon(points, LineSegment2D(glm::vec2(1, 0), glm::vec2(0, 1)));
         points = cut_polygon(points, LineSegment2D(glm::vec2(0, 1), glm::vec2(0, 0)));
