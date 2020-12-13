@@ -4,8 +4,8 @@
 
 static float rad = 0.0;
 void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 2, 800.f / 600.f, 0.5f, 100.f);
+    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
     vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(1, 0, 0)) * vertex.pos;
 }
 
@@ -159,7 +159,8 @@ void Renderer::inner_draw_triangle(Vertex vertices[3]) {
         viewPort_transform(V[i], width, height);
     for (int i = 0; i < numIdx; i += 3) {
         if (_drawMode == DrawMode::Fill) {
-            rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
+            if (backFaceCulling(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]))
+                rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
         }
         else if (_drawMode == DrawMode::WireFrame) {
             for (int j = 0; j < 3; j++) {
@@ -258,36 +259,32 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
         for (int i = minnpos.x; i <= maxxpos.x; i++) {
             glm::vec2 pos = glm::vec2(i + 0.5f, j + 0.5f);
 
-            // Counter clockwise culling
-            float a = cross2d(t[0], pos - v[0]);
-            float b = cross2d(t[1], pos - v[1]);
-            float c = cross2d(t[2], pos - v[2]);
+            //// Counter clockwise culling
+            //float a = cross2d(t[0], pos - v[0]);
+            //float b = cross2d(t[1], pos - v[1]);
+            //float c = cross2d(t[2], pos - v[2]);
 
-            int jud = 0;
-            if (a > 0) jud |= 1;
-            if (b > 0) jud |= 2;
-            if (c > 0) jud |= 4;
+            //int jud = 0;
+            //if (a > 0) jud |= 1;
+            //if (b > 0) jud |= 2;
+            //if (c > 0) jud |= 4;
 
-            // Top-Left Rule
-            bool b1 = (a != 0 || (a == 0 && isTopLeftEdge(t[0])));
-            bool b2 = (b != 0 || (b == 0 && isTopLeftEdge(t[1])));
-            bool b3 = (c != 0 || (c == 0 && isTopLeftEdge(t[2])));
-            bool inside = (b1 && b2 && b3);
+            //// Top-Left Rule
 
-            if (_cullMode == CullMode::None) {
-                inside &= (jud == 0 || jud == 7);
-            }
-            else if (_cullMode == CullMode::CullClockwise) {
-                inside &= (jud == 7);
-            }
-            else {
-                inside &= (jud == 0);
-            }
+            //bool inside = (b1 && b2 && b3) && ;
+            //if (jud != 0 && jud != 7)continue;
+            glm::vec2 uv = interpTransform * (pos - v[0]);
+            if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 || uv.x + uv.y > 1) continue;
+            glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
+
+            bool b1 = (interp.x != 0 || (interp.x == 0 && isTopLeftEdge(t[1])));
+            bool b2 = (interp.y != 0 || (interp.y == 0 && isTopLeftEdge(t[2])));
+            bool b3 = (interp.z != 0 || (interp.z == 0 && isTopLeftEdge(t[0])));
+            if (!b1 || !b2 || !b3)continue;
 
             // Barycentric calculation
-            if (!inside) continue;
-            glm::vec2 uv = interpTransform * (pos - v[0]);
-            glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
+
+
             float z = 1 / (interp.x / v1.pos.w + interp.y / v2.pos.w + interp.z / v3.pos.w);
             interp *= z;
 
@@ -358,6 +355,9 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
 int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numVertices) {
     *numVertices = 3;
     memcpy(output, input, sizeof(Vertex) * 3);
+
+
+
     for (int i = 0; i < *numVertices; i++) {
         output[i].pos.x /= input[i].pos.w;
         output[i].pos.y /= input[i].pos.w;
@@ -365,6 +365,19 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int* 
     }
     for (int i = 0; i < 3; i++) indices[i] = i;
     return 3;
+}
+
+bool Renderer::backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const {
+    glm::vec3 normal = glm::cross(glm::vec3(v2.pos - v1.pos), glm::vec3(v3.pos - v1.pos));
+    static const glm::vec3 eyeDir = glm::vec3(0, 0, 1);
+    // Select Cull Mode
+    if (_cullMode == CullMode::CullClockwise) {
+        return glm::dot(eyeDir, normal) > 0;
+    }
+    else if (_cullMode == CullMode::CullCounterClockwise) {
+        return glm::dot(eyeDir, normal) < 0;
+    }
+    return true;
 }
 
 Vertex Renderer::linear_interpolation(const Vertex& v1, const Vertex& v2, float t) const {

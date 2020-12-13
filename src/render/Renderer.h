@@ -43,6 +43,7 @@ public:
 
     void SetFrameBuffer(FrameBuffer* frameBuffer) { _frameBuffer = frameBuffer; }
     void SetDrawMode(DrawMode drawMode) { _drawMode = drawMode; }
+    void SetCullMode(CullMode cullMode) { _cullMode = cullMode; }
 
     void ClearFrameBuffer();
 
@@ -91,6 +92,8 @@ private:
     void bresenham(const Vertex* v1, const Vertex* v2);
 
     int homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numV);
+
+    bool backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const;
 
     Vertex linear_interpolation(const Vertex& v1, const Vertex& v2, float t) const;
     Vertex barycentric_interpolation(const Vertex& v1, const Vertex& v2, const Vertex& v3, const glm::vec3& bary) const;
