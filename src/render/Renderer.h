@@ -91,10 +91,10 @@ private:
     void rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3);
     void bresenham(const Vertex* v1, const Vertex* v2);
 
-    int homo_clipping(Vertex input[3], Vertex* output, int* indices, int* numV);
+    int homo_clipping(Vertex input[3], Vertex* output, int* indices, int& numVertices);
 
     bool backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const;
 
-    Vertex linear_interpolation(const Vertex& v1, const Vertex& v2, float t) const;
-    Vertex barycentric_interpolation(const Vertex& v1, const Vertex& v2, const Vertex& v3, const glm::vec3& bary) const;
+    Vertex linear_interpolation_Perspect(const Vertex& v1, const Vertex& v2, float t) const;
+    Vertex barycentric_interpolation_Perspect(const Vertex& v1, const Vertex& v2, const Vertex& v3, glm::vec3 bary) const;
 };

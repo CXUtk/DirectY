@@ -57,6 +57,9 @@
     <ClInclude Include="src\resource\ObjLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\framework\geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -86,6 +89,9 @@
     <ClCompile Include="src\resource\ObjLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\framework\geometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\framework\small.ico">
@@ -104,5 +110,6 @@
     <None Include="DirectY.aps" />
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
+    <None Include="src\framework\DirectY.aps" />
   </ItemGroup>
 </Project>

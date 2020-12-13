@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="src\DirectY.h" />
     <ClInclude Include="src\framework\framework.h" />
+    <ClInclude Include="src\framework\geometry.h" />
     <ClInclude Include="src\framework\lodepng.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\framework\Resource.h" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />
+    <ClCompile Include="src\framework\geometry.cpp" />
     <ClCompile Include="src\framework\lodepng.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\render\buffers\FrameBuffer.cpp" />
@@ -184,6 +186,7 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="DirectY.aps" />
+    <None Include="src\framework\DirectY.aps" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
