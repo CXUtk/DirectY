@@ -27,13 +27,6 @@ enum class CullMode {
     CullCounterClockwise,
 };
 
-struct Vertex {
-    glm::vec4 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
-    Vertex() : pos(0), color(0), texCoord(0) {}
-    Vertex(glm::vec4 pos, glm::vec3 color, glm::vec2 texCoord) :pos(pos), color(color), texCoord(texCoord) {}
-};
 
 
 class Renderer {
@@ -76,6 +69,11 @@ public:
 
     void DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff);
 
+    void ClearStats() { _numRaster = 0; }
+    void ReportStats() {
+        printf("Number of Raster Triangles: %d\n", _numRaster);
+    }
+
 private:
     FrameBuffer* _frameBuffer;
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
@@ -84,6 +82,8 @@ private:
 
     DrawMode _drawMode;
     CullMode _cullMode;
+
+    int _numRaster;
 
     void inner_draw_triangle(Vertex vertices[3]);
     void inner_draw_line(Vertex vertices[2]);
