@@ -77,7 +77,7 @@ void ObjLoader::process() {
             for (int j = 0; j < 3; j++) {
                 bool b = readInt(faceV, id, vd[j]);
                 id++;
-                if (!b)break;
+                if (!b || faceV[id - 1] != '/')break;
             }
             vertices.push_back({ vd[0], vd[1], vd[2] });
             //int i = 0;

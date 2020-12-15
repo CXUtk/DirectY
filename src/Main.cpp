@@ -31,7 +31,7 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
     //};
 
     ObjLoader loader;
-    loader.load("models/cube.obj");
+    loader.load("models/bunny.obj");
     auto vs = loader.getVertices();
     _numVertices = vs.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), vs.data());
@@ -44,7 +44,7 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
 void Main::Run() {
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
-    // _renderer->SetDrawMode(DrawMode::WireFrame);
+    _renderer->SetDrawMode(DrawMode::WireFrame);
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);

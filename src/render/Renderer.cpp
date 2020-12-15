@@ -3,10 +3,10 @@
 #include <algorithm>
 
 
-static float rad = 1.44;
+static float rad = 0;
 void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 2, 800.f / 600.f, 0.5f, 100.f);
+    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
     vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(0, 1, 1)) * vertex.pos;
 }
 
@@ -27,7 +27,7 @@ glm::vec3 fragment_shader(const glm::vec4& pos, const glm::vec3& color, const gl
     uv.y = std::fmod(uv.y, 1.0);
     bool a = uv.x < 0.5;
     bool b = uv.y < 0.5;
-    return color * ((a + b == 1) ? glm::vec3(1) : glm::vec3(0.5));
+    return color * ((a + b == 1) ? glm::vec3(0.5) : glm::vec3(1));
 }
 
 
@@ -319,7 +319,7 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
     for (int i = start.x, j = start.y; i <= end.x; i++) {
         float t = (i - start.x) / (float)(end.x - start.x);
         float z = 1 / ((1 - t) / v1->pos.w + t / v2->pos.w);
-        glm::vec3 color = glm::mix(colorM[0], colorM[1], t) * z * (-glm::mix(posM[0], posM[1], t).z * 0.5f + 0.5f);
+        glm::vec3 color = glm::mix(colorM[0], colorM[1], t) * z /** (-glm::mix(posM[0], posM[1], t).z * 0.5f + 0.5f)*/;
         if (swp) {
             if (_frameBuffer->GetZBuffer(j, i) >= z) {
                 _frameBuffer->Write(j, i, color);/*fragment_shader(position, color, texCoord)*/
