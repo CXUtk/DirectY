@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "device/GraphicDevice.h"
+#include "../framework/device/GraphicDevice.h"
 #include "buffers/FrameBuffer.h"
 #include "buffers/VertexBuffer.h"
 #include "buffers/IndexBuffer.h"

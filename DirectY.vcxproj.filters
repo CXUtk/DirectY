@@ -48,19 +48,10 @@
     <ClInclude Include="src\render\buffers\IndexBuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\device\GraphicDevice.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\device\GDIDevice.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\resource\ObjLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\framework\geometry.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\framework\system\WindowsSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\render\shaders\FragmentShader.h">
@@ -70,6 +61,21 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\framework\system\DYWindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\device\GDIDevice.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\device\GraphicDevice.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\system\UserInput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\system\SystemUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,9 +101,6 @@
     <ClCompile Include="src\render\buffers\IndexBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\device\GDIDevice.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\resource\ObjLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -111,6 +114,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\framework\system\Win32.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\device\GDIDevice.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\system\UserInput.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

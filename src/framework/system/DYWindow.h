@@ -1,4 +1,8 @@
 ﻿#pragma once
+#include <memory>
+#include "../device/GraphicDevice.h"
+#include "SystemUtils.h"
+
 class DYWindow {
 public:
     DYWindow() = default;
@@ -8,4 +12,6 @@ public:
 
     virtual int getWidth() const = 0;
     virtual int getHeight() const = 0;
+    virtual std::shared_ptr<GraphicDevice> getGraphicDevice() const = 0;
+    virtual MouseInfo getMouseInfo() const = 0;
 };

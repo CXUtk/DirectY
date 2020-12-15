@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../buffers/FrameBuffer.h"
+#include "../../render/buffers/FrameBuffer.h"
 class GraphicDevice {
 public:
     GraphicDevice() {}

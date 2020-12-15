@@ -1,10 +1,14 @@
 ﻿#include "Win32.h"
 #include "../Resource.h"
 
+#include <windowsx.h>
 #include <iostream>
 
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+Win32Window* Win32Window::_instance = nullptr;
+
+Win32Window::Win32Window() {
+    _instance = this;
+}
 
 void Win32Window::Init() {
     hInst = GetModuleHandle(NULL);
@@ -19,6 +23,7 @@ void Win32Window::Init() {
         throw;
     }
     hAccelTable = LoadAccelerators(hInst, MAKEINTRESOURCE(IDC_DIRECTY));
+    _graphicDevice = std::make_shared<GDIDevice>(hWnd);
 }
 
 void Win32Window::PollEvents() {
@@ -127,12 +132,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         break;
     }
     case WM_LBUTTONDOWN: {
+        Win32Window::_instance->_userInput.MouseDown();
         break;
     }
     case WM_LBUTTONUP: {
+        Win32Window::_instance->_userInput.MouseUp();
         break;
     }
     case WM_MOUSEMOVE: {
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+        Win32Window::_instance->_userInput.MouseMove(glm::ivec2(xPos, yPos));
         break;
     }
     case WM_ERASEBKGND:
