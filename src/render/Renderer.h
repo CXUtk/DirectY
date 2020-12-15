@@ -100,7 +100,7 @@ private:
     int homo_clipping(Vertex input[3], Vertex* output, int* indices, int& numVertices);
     ClippingType need_clipping(glm::vec3 v[3]) const;
 
-    bool backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const;
+    bool backFaceCulling(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3) const;
 
     Vertex linear_interpolation_Perspect(const Vertex& v1, const Vertex& v2, float t) const;
     Vertex barycentric_interpolation_Perspect(const Vertex& v1, const Vertex& v2, const Vertex& v3, glm::vec3 bary) const;

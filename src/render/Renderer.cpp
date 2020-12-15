@@ -4,8 +4,9 @@
 
 
 static float rad = 0;
+static constexpr float EPS = 1e-7f;
 void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
     vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(0, 1, 1)) * vertex.pos;
 }
@@ -100,7 +101,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    rad += 0.008f;
+    //rad += 0.008f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
@@ -150,6 +151,7 @@ void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Prim
 
 void Renderer::inner_draw_triangle(Vertex vertices[3]) {
     _numRaster++;
+
     int width = _frameBuffer->GetWidth();
     int height = _frameBuffer->GetHeight();
     static Vertex V[32];
@@ -163,8 +165,7 @@ void Renderer::inner_draw_triangle(Vertex vertices[3]) {
     }
     for (int i = 0; i < numIdx; i += 3) {
         if (_drawMode == DrawMode::Fill) {
-            if (backFaceCulling(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]))
-                rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
+            rasterize(V[indices[i]], V[indices[i + 1]], V[indices[i + 2]]);
         }
         else if (_drawMode == DrawMode::WireFrame) {
             for (int j = 0; j < 3; j++) {
@@ -263,14 +264,14 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
             // Barycentric calculation
             glm::vec2 uv = interpTransform * (pos - v[0]);
 
-            if (isnan(uv.x) || isnan(uv.y) || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 || uv.x + uv.y > 1) continue;
+
+            if (isnan(uv.x) || isnan(uv.y) || uv.x < -EPS || uv.x > 1 + EPS || uv.y < -EPS || uv.y > 1 + EPS || uv.x + uv.y > 1 + EPS) continue;
             glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
 
-            bool b1 = (interp.x != 0 || (interp.x == 0 && isTopLeftEdge(t[1])));
-            bool b2 = (interp.y != 0 || (interp.y == 0 && isTopLeftEdge(t[2])));
-            bool b3 = (interp.z != 0 || (interp.z == 0 && isTopLeftEdge(t[0])));
+            bool b1 = (std::abs(interp.x) > EPS || (std::abs(interp.x) < EPS && isTopLeftEdge(t[1])));
+            bool b2 = (std::abs(interp.y) > EPS || (std::abs(interp.y) < EPS && isTopLeftEdge(t[2])));
+            bool b3 = (std::abs(interp.z) > EPS || (std::abs(interp.z) < EPS && isTopLeftEdge(t[0])));
             if (!b1 || !b2 || !b3)continue;
-
             float z = 1 / (interp.x / v1.pos.w + interp.y / v2.pos.w + interp.z / v3.pos.w);
             interp *= z;
 
@@ -391,13 +392,13 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
     //for (int i = 0; i < 3; i++) indices[i] = i;
     //return 3;
     static glm::vec3 initial[3];
-
     for (int i = 0; i < 3; i++) {
         initial[i] = glm::vec3(input[i].pos / input[i].pos.w);
     }
+    numVertices = 0;
+    if (_drawMode == DrawMode::Fill && !backFaceCulling(initial[0], initial[1], initial[2])) return 0;
     auto cliptype = need_clipping(initial);
     if (cliptype == ClippingType::AllOut) {
-        numVertices = 0;
         return 0;
     }
     else if (cliptype == ClippingType::AllIn) {
@@ -490,8 +491,8 @@ ClippingType Renderer::need_clipping(glm::vec3 v[3]) const {
     return ClippingType::NeedClip;
 }
 
-bool Renderer::backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const {
-    glm::vec3 normal = glm::cross(glm::vec3(v2.pos - v1.pos), glm::vec3(v3.pos - v1.pos));
+bool Renderer::backFaceCulling(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3) const {
+    glm::vec3 normal = glm::cross(v2 - v1, v3 - v1);
     static const glm::vec3 eyeDir = glm::vec3(0, 0, 1);
     // Select Cull Mode
     if (_cullMode == CullMode::CullClockwise)
