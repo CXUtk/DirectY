@@ -10,6 +10,8 @@
 Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height(height) {
     _renderer = new Renderer(width, height, std::make_shared<GDIDevice>(hwnd));
 
+    _renderer->SetVertexShader(std::make_shared<VertexShader>());
+    _renderer->SetFragmentShader(std::make_shared<FragmentShader>());
     //Vertex triangle[6] = {
     //    Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
     //    Vertex(glm::vec4(-0.5, -0.5, 0, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1)),
@@ -32,7 +34,7 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
     //};
 
     ObjLoader loader;
-    loader.load("models/cube.obj");
+    loader.load("models/spot.obj");
     auto vs = loader.getVertices();
     _numVertices = vs.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), vs.data());

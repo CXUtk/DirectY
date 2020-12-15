@@ -153,6 +153,8 @@
     <ClInclude Include="src\framework\framework.h" />
     <ClInclude Include="src\framework\geometry.h" />
     <ClInclude Include="src\framework\lodepng.h" />
+    <ClInclude Include="src\framework\system\SubSystem.h" />
+    <ClInclude Include="src\framework\system\WindowsSystem.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\framework\Resource.h" />
     <ClInclude Include="src\framework\targetver.h" />
@@ -161,6 +163,7 @@
     <ClInclude Include="src\render\device\GDIDevice.h" />
     <ClInclude Include="src\render\device\GraphicDevice.h" />
     <ClInclude Include="src\render\Renderer.h" />
+    <ClInclude Include="src\render\shaders\FragmentShader.h" />
     <ClInclude Include="src\render\shaders\VertexShader.h" />
     <ClInclude Include="src\render\buffers\VertexBuffer.h" />
     <ClInclude Include="src\resource\ObjLoader.h" />
@@ -175,6 +178,8 @@
     <ClCompile Include="src\render\device\GDIDevice.cpp" />
     <ClCompile Include="src\render\Renderer.cpp" />
     <ClCompile Include="src\render\buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\render\shaders\FragmentShader.cpp" />
+    <ClCompile Include="src\render\shaders\VertexShader.cpp" />
     <ClCompile Include="src\resource\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -60,6 +60,15 @@
     <ClInclude Include="src\framework\geometry.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\framework\system\SubSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\system\WindowsSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\shaders\FragmentShader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -90,6 +99,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\framework\geometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shaders\VertexShader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shaders\FragmentShader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

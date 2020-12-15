@@ -9,6 +9,8 @@
 #include "buffers/FrameBuffer.h"
 #include "buffers/VertexBuffer.h"
 #include "buffers/IndexBuffer.h"
+#include "shaders/FragmentShader.h"
+#include "shaders/VertexShader.h"
 
 enum class Primitives {
     Points,
@@ -43,6 +45,8 @@ public:
     void SetFrameBuffer(FrameBuffer* frameBuffer) { _frameBuffer = frameBuffer; }
     void SetDrawMode(DrawMode drawMode) { _drawMode = drawMode; }
     void SetCullMode(CullMode cullMode) { _cullMode = cullMode; }
+    void SetVertexShader(std::shared_ptr<VertexShader> vertexShader) { _vertexShader = vertexShader; }
+    void SetFragmentShader(std::shared_ptr<FragmentShader> fragShader) { _fragmentShader = fragShader; }
 
     void ClearFrameBuffer();
 
@@ -85,6 +89,8 @@ private:
     std::vector<std::shared_ptr<VertexBuffer>> _vertexBuffers;
     std::vector<std::shared_ptr<IndexBuffer>> _indexBuffers;
     std::shared_ptr<GraphicDevice> _graphicDevice;
+    std::shared_ptr<VertexShader> _vertexShader;
+    std::shared_ptr<FragmentShader> _fragmentShader;
 
     DrawMode _drawMode;
     CullMode _cullMode;

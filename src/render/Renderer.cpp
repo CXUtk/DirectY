@@ -5,11 +5,6 @@
 
 static float rad = 0;
 static constexpr float EPS = 1e-7f;
-void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
-    vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(0, 1, 1)) * vertex.pos;
-}
 
 void viewPort_transform(Vertex& vertex, int width, int height) {
 
@@ -20,15 +15,6 @@ void viewPort_transform(Vertex& vertex, int width, int height) {
 
     //assert(vertex.pos.x >= 0 && vertex.pos.x <= width);
     //assert(vertex.pos.y >= 0 && vertex.pos.y <= height);
-}
-
-glm::vec3 fragment_shader(const glm::vec4& pos, const glm::vec3& color, const glm::vec2& texCoord, const glm::vec3& normal) {
-    auto uv = texCoord * 5.f;
-    uv.x = std::fmod(uv.x, 1.0);
-    uv.y = std::fmod(uv.y, 1.0);
-    bool a = uv.x < 0.5;
-    bool b = uv.y < 0.5;
-    return color * ((a + b == 1) ? glm::vec3(0.5) : glm::vec3(1));
 }
 
 
@@ -79,7 +65,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
             for (int j = 0; j < 3; j++) {
                 memcpy(&V[j], buffer + idx + j * sizePerVertex, sizePerVertex);
                 V[j].pos.w = 1.0f;
-                vertex_shader(V[j]);
+                _vertexShader->vertex_shader(V[j]);
             }
             inner_draw_triangle(V);
         }
@@ -92,7 +78,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
             for (int j = 0; j < 2; j++) {
                 memcpy(&V[j], buffer + idx + j * sizePerVertex, sizePerVertex);
                 V[j].pos.w = 1.0f;
-                vertex_shader(V[j]);
+                _vertexShader->vertex_shader(V[j]);
             }
             inner_draw_line(V);
         }
@@ -101,7 +87,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    //rad += 0.008f;
+    rad += 0.008f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
@@ -122,7 +108,7 @@ void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Prim
             for (int j = 0; j < 3; j++) {
                 memcpy(&V[j], buffer + (idArray[i + j]) * sizePerVertex, sizePerVertex);
                 V[j].pos.w = 1.0f;
-                vertex_shader(V[j]);
+                _vertexShader->vertex_shader(V[j]);
             }
             inner_draw_triangle(V);
 
@@ -135,7 +121,7 @@ void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Prim
             for (int j = 0; j < 2; j++) {
                 memcpy(&V[j], buffer + (idArray[i + j]) * sizePerVertex, sizePerVertex);
                 V[j].pos.w = 1.0f;
-                vertex_shader(V[j]);
+                _vertexShader->vertex_shader(V[j]);
             }
             inner_draw_line(V);
         }
@@ -256,6 +242,7 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     glm::mat3x4 posMat(v1.pos / v1.pos.w, v2.pos / v2.pos.w, v3.pos / v3.pos.w);
     glm::mat3x2 texMat(v1.texCoord / v1.pos.w, v2.texCoord / v2.pos.w, v3.texCoord / v3.pos.w);
     glm::mat3x3 normalMat(v1.normal / v1.pos.w, v2.normal / v2.pos.w, v3.normal / v3.pos.w);
+    FragmentShaderPayload payload;
 
     for (int j = minnpos.y; j <= maxxpos.y; j++) {
         for (int i = minnpos.x; i <= maxxpos.x; i++) {
@@ -278,12 +265,12 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
             // Check z-buffer
             if (z > _frameBuffer->GetZBuffer(i, j)) continue;
 
-            glm::vec3 color = colorMat * interp;
-            glm::vec4 position = posMat * interp;
-            glm::vec2 texCoord = texMat * interp;
-            glm::vec3 normal = normalMat * interp;
+            payload.vertex.color = colorMat * interp;
+            payload.vertex.pos = posMat * interp;
+            payload.vertex.texCoord = texMat * interp;
+            payload.vertex.normal = normalMat * interp;
 
-            _frameBuffer->Write(i, j, fragment_shader(position, color, texCoord, normal));
+            _frameBuffer->Write(i, j, _fragmentShader->fragment_shader(payload));
             _frameBuffer->WriteZBuffer(i, j, z);
         }
     }
