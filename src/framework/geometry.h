@@ -13,6 +13,18 @@ struct LineSegment2D {
     glm::vec2 interp(float t) { return glm::mix(start, end, t); }
 };
 
+struct Plane3D {
+    glm::vec4 eqn;
+    Plane3D() = default;
+    Plane3D(glm::vec4 eqn) : eqn(eqn) {}
+    Plane3D(glm::vec3 normal, float d) : eqn(glm::vec4(normal, d)) {}
+    Plane3D(glm::vec3 p, glm::vec3 v1, glm::vec3 v2) {
+        glm::vec3 normal = glm::cross(v1, v2);
+        eqn = glm::vec4(normal, -glm::dot(normal, p));
+    }
+    float side(glm::vec3 p) const { return glm::dot(glm::vec4(p, 1.0f), eqn); }
+};
+
 bool isTopLeftEdge(glm::vec2 v);
 
 float cross2d(glm::vec2 a, glm::vec2 b);

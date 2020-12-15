@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "resource/ObjLoader.h"
+#include "framework/geometry.h"
 
 
 Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height(height) {

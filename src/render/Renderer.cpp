@@ -364,6 +364,21 @@ static LineSegment cubeSeg[12] = {
     LineSegment(glm::vec3(-1, 1, -1), glm::vec3(-1, 1, 1)),
 };
 
+static Plane3D unitPlanes[6] = {
+    // Near
+    Plane3D(glm::vec4(0, 0, 1, 1)),
+    // Far
+    Plane3D(glm::vec4(0, 0, -1, 1)),
+    // Left
+    Plane3D(glm::vec4(1, 0, 0, 1)),
+    // Right
+    Plane3D(glm::vec4(-1, 0, 0, 1)),
+    // Top
+    Plane3D(glm::vec4(0, -1, 0, 1)),
+    // Bottom
+    Plane3D(glm::vec4(0, 1, 0, 1)),
+};
+
 // 齐次坐标剪裁算法
 int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& numVertices) {
     //numVertices = 3;
@@ -380,6 +395,22 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
     for (int i = 0; i < 3; i++) {
         initial[i] = glm::vec3(input[i].pos / input[i].pos.w);
     }
+    auto cliptype = need_clipping(initial);
+    if (cliptype == ClippingType::AllOut) {
+        numVertices = 0;
+        return 0;
+    }
+    else if (cliptype == ClippingType::AllIn) {
+        numVertices = 3;
+        memcpy(output, input, sizeof(Vertex) * 3);
+        for (int i = 0; i < numVertices; i++) {
+            output[i].pos.x /= input[i].pos.w;
+            output[i].pos.y /= input[i].pos.w;
+            output[i].pos.z /= input[i].pos.w;
+        }
+        for (int i = 0; i < 3; i++) indices[i] = i;
+        return 3;
+    }
     std::vector<glm::vec2> points;
     // 求出三角形所在平面和立方体的截面，并进行基底变换投影到2维平面上
     // 求出的点集一定构成一个凸多边形
@@ -392,7 +423,7 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
         }
     }
     // 如果是非退化情况，将此凸多边形和三角形进行半平面交剪裁
-    if (points.size() >= 1) {
+    if (!points.empty()) {
 
         std::sort(points.begin(), points.end(), [](glm::vec2 a, glm::vec2 b) {
             return a.y < b.y || (a.y == b.y && a.x < b.x);
@@ -435,6 +466,28 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
         for (int i = 0; i < 3; i++) indices[i] = i;
         return 3;
     }
+}
+
+ClippingType Renderer::need_clipping(glm::vec3 v[3]) const {
+    bool inside = true;
+    for (int i = 0; i < 3; i++) {
+        if (v[i].x < -1 || v[i].x > 1 || v[i].y < -1 || v[i].y > 1 || v[i].z < -1 || v[i].z > 1) {
+            inside = false;
+            break;
+        }
+    }
+    if (inside) return ClippingType::AllIn;
+    for (int i = 0; i < 6; i++) {
+        bool allOut = true;
+        for (int j = 0; j < 3; j++) {
+            if (unitPlanes[i].side(v[j]) >= 0) {
+                allOut = false;
+                break;
+            }
+        }
+        if (allOut) return ClippingType::AllOut;
+    }
+    return ClippingType::NeedClip;
 }
 
 bool Renderer::backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const {

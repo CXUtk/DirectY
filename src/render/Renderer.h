@@ -28,6 +28,12 @@ enum class CullMode {
 };
 
 
+enum class ClippingType {
+    AllIn,
+    AllOut,
+    NeedClip,
+};
+
 
 class Renderer {
 public:
@@ -92,6 +98,7 @@ private:
     void bresenham(const Vertex* v1, const Vertex* v2);
 
     int homo_clipping(Vertex input[3], Vertex* output, int* indices, int& numVertices);
+    ClippingType need_clipping(glm::vec3 v[3]) const;
 
     bool backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const;
 
