@@ -44,12 +44,11 @@ Main::Main(HWND hwnd, int width, int height) :hWnd(hwnd), _width(width), _height
 void Main::Run() {
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
-    //_renderer->SetDrawMode(DrawMode::WireFrame);
-    // _renderer->SetCullMode(CullMode::CullClockwise);
+    // _renderer->SetDrawMode(DrawMode::WireFrame);
+    _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
-    //_renderer->ReportStats();
 }

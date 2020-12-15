@@ -47,7 +47,7 @@ std::vector<Vertex> ObjLoader::getVertices() const {
             if (f.vt[i])
                 v[i].texCoord = TexCoords[f.vt[i] - 1];
             if (f.vn[i])
-                v[i].normal = Vertices[f.vn[i] - 1];
+                v[i].normal = Normals[f.vn[i] - 1];
             v[i].color = glm::vec3(1);
             vertices.push_back(v[i]);
         }

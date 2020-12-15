@@ -3,10 +3,10 @@
 #include <algorithm>
 
 
-static float rad = 1.0;
+static float rad = 1.44;
 void vertex_shader(Vertex& vertex) {
-    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
+    static glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 2.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    static glm::mat4 proj = glm::perspective(glm::pi<float>() / 2, 800.f / 600.f, 0.5f, 100.f);
     vertex.pos = proj * view * glm::rotate(-rad, glm::vec3(0, 1, 1)) * vertex.pos;
 }
 
@@ -14,8 +14,8 @@ void viewPort_transform(Vertex& vertex, int width, int height) {
 
     float x = vertex.pos.x;
     float y = vertex.pos.y;
-    vertex.pos.x = (x * 0.5f + 0.4999f) * width;
-    vertex.pos.y = (y * 0.5f + 0.4999f) * height;
+    vertex.pos.x = (x * 0.5f + 0.5f) * width;
+    vertex.pos.y = (y * 0.5f + 0.5f) * height;
 
     //assert(vertex.pos.x >= 0 && vertex.pos.x <= width);
     //assert(vertex.pos.y >= 0 && vertex.pos.y <= height);
@@ -100,7 +100,7 @@ void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives pr
     default:
         break;
     }
-    // rad += 0.008f;
+    rad += 0.008f;
 }
 
 void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Primitives primType, int idBuff) {
@@ -124,6 +124,7 @@ void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Prim
                 vertex_shader(V[j]);
             }
             inner_draw_triangle(V);
+
         }
         break;
     }
@@ -148,6 +149,7 @@ void Renderer::DrawElementsWithIndex(int vBuff, size_t offset, size_t size, Prim
 
 
 void Renderer::inner_draw_triangle(Vertex vertices[3]) {
+    _numRaster++;
     int width = _frameBuffer->GetWidth();
     int height = _frameBuffer->GetHeight();
     static Vertex V[32];
@@ -210,7 +212,7 @@ void Renderer::inner_draw_line(Vertex vertices[2]) {
 }
 
 void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
-    _numRaster++;
+    //_numRaster++;
     int width = _frameBuffer->GetWidth();
     int height = _frameBuffer->GetHeight();
 
@@ -245,6 +247,10 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     glm::mat2 interpTransform(v[1] - v[0], v[2] - v[0]);
     interpTransform = glm::inverse(interpTransform);
 
+    if (std::isnan(interpTransform[0][0]) || std::isnan(interpTransform[0][1]) || std::isnan(interpTransform[1][0]) || std::isnan(interpTransform[1][1])) {
+        /*printf("%lf %lf, %lf %lf, %lf %lf\n", v[0].x, v[0].y, v[1].x, v[1].y, v[2].x, v[2].y);*/
+        return;
+    }
     glm::mat3x3 colorMat(v1.color / v1.pos.w, v2.color / v2.pos.w, v3.color / v3.pos.w);
     glm::mat3x4 posMat(v1.pos / v1.pos.w, v2.pos / v2.pos.w, v3.pos / v3.pos.w);
     glm::mat3x2 texMat(v1.texCoord / v1.pos.w, v2.texCoord / v2.pos.w, v3.texCoord / v3.pos.w);
@@ -256,7 +262,8 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
 
             // Barycentric calculation
             glm::vec2 uv = interpTransform * (pos - v[0]);
-            if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 || uv.x + uv.y > 1) continue;
+
+            if (isnan(uv.x) || isnan(uv.y) || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 || uv.x + uv.y > 1) continue;
             glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
 
             bool b1 = (interp.x != 0 || (interp.x == 0 && isTopLeftEdge(t[1])));
@@ -305,22 +312,23 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
     int a = 2 * dy, b = 2 * (dy - dx);
     int cur = 2 * dy - dx;
 
-    //glm::vec4 posM[2] = { v1->pos / v1->pos.w, v2->pos / v2->pos.w };
+    glm::vec4 posM[2] = { v1->pos / v1->pos.w, v2->pos / v2->pos.w };
     glm::vec3 colorM[2] = { v1->color / v1->pos.w, v2->color / v2->pos.w };
     //glm::vec2 texCoord[2] = { v1->texCoord / v1->pos.w, v2->texCoord / v2->pos.w };
     //glm::vec3 normal[2] = { v1->normal / v1->pos.w, v2->normal / v2->pos.w };
     for (int i = start.x, j = start.y; i <= end.x; i++) {
         float t = (i - start.x) / (float)(end.x - start.x);
         float z = 1 / ((1 - t) / v1->pos.w + t / v2->pos.w);
+        glm::vec3 color = glm::mix(colorM[0], colorM[1], t) * z * (-glm::mix(posM[0], posM[1], t).z * 0.5f + 0.5f);
         if (swp) {
             if (_frameBuffer->GetZBuffer(j, i) >= z) {
-                _frameBuffer->Write(j, i, glm::mix(colorM[0], colorM[1], t) * z);/*fragment_shader(position, color, texCoord)*/
+                _frameBuffer->Write(j, i, color);/*fragment_shader(position, color, texCoord)*/
                 _frameBuffer->WriteZBuffer(j, i, z);
             }
         }
         else {
             if (_frameBuffer->GetZBuffer(i, j) >= z) {
-                _frameBuffer->Write(i, j, glm::mix(colorM[0], colorM[1], t) * z);
+                _frameBuffer->Write(i, j, color);
                 _frameBuffer->WriteZBuffer(i, j, z);
             }
         }
@@ -358,76 +366,85 @@ static LineSegment cubeSeg[12] = {
 
 // 齐次坐标剪裁算法
 int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& numVertices) {
-    //static glm::vec3 initial[3];
-
-    //for (int i = 0; i < 3; i++) {
-    //    initial[i] = glm::vec3(input[i].pos / input[i].pos.w);
+    //numVertices = 3;
+    //memcpy(output, input, sizeof(Vertex) * 3);
+    //for (int i = 0; i < numVertices; i++) {
+    //    output[i].pos.x /= input[i].pos.w;
+    //    output[i].pos.y /= input[i].pos.w;
+    //    output[i].pos.z /= input[i].pos.w;
     //}
-    //std::vector<glm::vec2> points;
-    //// 求出三角形所在平面和立方体的截面，并进行基底变换投影到2维平面上
-    //// 求出的点集一定构成一个凸多边形
-    //for (int i = 0; i < 12; i++) {
-    //    glm::vec3 parameter;
-    //    if (plane_segment_intersection(cubeSeg[i], initial[0], initial[1], initial[2], parameter)) {
-    //        if (parameter.z == 0 || parameter.z == 1) continue;
+    //for (int i = 0; i < 3; i++) indices[i] = i;
+    //return 3;
+    static glm::vec3 initial[3];
 
-    //        points.push_back(glm::vec2(parameter.x, parameter.y));
-    //    }
-    //}
-    //// 如果是非退化情况，将此凸多边形和三角形进行半平面交剪裁
-    //if (points.size() >= 1) {
-
-    //    std::sort(points.begin(), points.end(), [](glm::vec2 a, glm::vec2 b) {
-    //        return a.y < b.y || (a.y == b.y && a.x < b.x);
-    //        });
-    //    glm::vec2 origin = points[0];
-    //    std::sort(points.begin(), points.end(), [=](glm::vec2 a, glm::vec2 b) {
-    //        return cross2d(a - origin, b - origin) > 0;
-    //        });
-    //    //for (auto p : points) {
-    //    //    printf("%lf %lf\n", p.x, p.y);
-    //    //}
-    //    points = cut_polygon(points, LineSegment2D(glm::vec2(0, 0), glm::vec2(1, 0)));
-    //    points = cut_polygon(points, LineSegment2D(glm::vec2(1, 0), glm::vec2(0, 1)));
-    //    points = cut_polygon(points, LineSegment2D(glm::vec2(0, 1), glm::vec2(0, 0)));
-
-    //    int tot = 0;
-    //    for (auto p : points) {
-    //        // printf("%lf %lf\n", p.x, p.y);
-    //        output[tot++] = barycentric_interpolation_Perspect(input[0], input[1], input[2], glm::vec3(1 - p.x - p.y, p.x, p.y));
-    //    }
-    //    numVertices = tot;
-    //    int inds = 0;
-    //    for (int i = 1; i < numVertices - 1; i++) {
-    //        indices[inds++] = 0;
-    //        indices[inds++] = i;
-    //        indices[inds++] = i + 1;
-    //    }
-    //    return inds;
-    //}
-    //else {
-    numVertices = 3;
-    memcpy(output, input, sizeof(Vertex) * 3);
-    for (int i = 0; i < numVertices; i++) {
-        output[i].pos.x /= input[i].pos.w;
-        output[i].pos.y /= input[i].pos.w;
-        output[i].pos.z /= input[i].pos.w;
+    for (int i = 0; i < 3; i++) {
+        initial[i] = glm::vec3(input[i].pos / input[i].pos.w);
     }
-    for (int i = 0; i < 3; i++) indices[i] = i;
-    return 3;
-    //}
+    std::vector<glm::vec2> points;
+    // 求出三角形所在平面和立方体的截面，并进行基底变换投影到2维平面上
+    // 求出的点集一定构成一个凸多边形
+    for (int i = 0; i < 12; i++) {
+        glm::vec3 parameter;
+        if (plane_segment_intersection(cubeSeg[i], initial[0], initial[1], initial[2], parameter)) {
+            if (parameter.z == 0 || parameter.z == 1) continue;
+
+            points.push_back(glm::vec2(parameter.x, parameter.y));
+        }
+    }
+    // 如果是非退化情况，将此凸多边形和三角形进行半平面交剪裁
+    if (points.size() >= 1) {
+
+        std::sort(points.begin(), points.end(), [](glm::vec2 a, glm::vec2 b) {
+            return a.y < b.y || (a.y == b.y && a.x < b.x);
+            });
+        glm::vec2 origin = points[0];
+        std::sort(points.begin(), points.end(), [=](glm::vec2 a, glm::vec2 b) {
+            return cross2d(a - origin, b - origin) > 0;
+            });
+        //if (_numRaster == 3) {
+        //    for (auto p : points) {
+        //        printf("%lf %lf\n", p.x, p.y);
+        //    }
+        //}
+        points = cut_polygon(points, LineSegment2D(glm::vec2(0, 0), glm::vec2(1, 0)));
+        points = cut_polygon(points, LineSegment2D(glm::vec2(1, 0), glm::vec2(0, 1)));
+        points = cut_polygon(points, LineSegment2D(glm::vec2(0, 1), glm::vec2(0, 0)));
+
+        int tot = 0;
+        for (auto p : points) {
+            // printf("%lf %lf\n", p.x, p.y);
+            output[tot++] = barycentric_interpolation_Perspect(input[0], input[1], input[2], glm::vec3(1 - p.x - p.y, p.x, p.y));
+        }
+        numVertices = tot;
+        int inds = 0;
+        for (int i = 1; i < numVertices - 1; i++) {
+            indices[inds++] = 0;
+            indices[inds++] = i;
+            indices[inds++] = i + 1;
+        }
+        return inds;
+    }
+    else {
+        numVertices = 3;
+        memcpy(output, input, sizeof(Vertex) * 3);
+        for (int i = 0; i < numVertices; i++) {
+            output[i].pos.x /= input[i].pos.w;
+            output[i].pos.y /= input[i].pos.w;
+            output[i].pos.z /= input[i].pos.w;
+        }
+        for (int i = 0; i < 3; i++) indices[i] = i;
+        return 3;
+    }
 }
 
 bool Renderer::backFaceCulling(const Vertex& v1, const Vertex& v2, const Vertex& v3) const {
     glm::vec3 normal = glm::cross(glm::vec3(v2.pos - v1.pos), glm::vec3(v3.pos - v1.pos));
     static const glm::vec3 eyeDir = glm::vec3(0, 0, 1);
     // Select Cull Mode
-    if (_cullMode == CullMode::CullClockwise) {
+    if (_cullMode == CullMode::CullClockwise)
         return glm::dot(eyeDir, normal) >= 0;
-    }
-    else if (_cullMode == CullMode::CullCounterClockwise) {
+    else if (_cullMode == CullMode::CullCounterClockwise)
         return glm::dot(eyeDir, normal) <= 0;
-    }
     return true;
 }
 

@@ -13,7 +13,7 @@ bool plane_segment_intersection(const LineSegment& seg, const glm::vec3& A, cons
     glm::mat3 M(B - A, C - A, seg.start - seg.end);
     M = glm::inverse(M);
     glm::vec3 res = M * augment;
-    if (isnan(res.z) || res.z < 0 || res.z > 1) return false;
+    if (isnan(res.x) || isnan(res.y) || isnan(res.z) || res.z < 0 || res.z > 1) return false;
     result = res;
     return true;
 }
@@ -37,9 +37,8 @@ std::vector<glm::vec2> cut_polygon(const std::vector<glm::vec2>& poly, const Lin
         LineSegment2D L(A, B);
         glm::vec2 test;
         if (segment_segment_intersection(LineSegment2D(line.start, line.end), L, test)) {
-            if (test.y <= 0 || test.y >= 1) continue;
+            if (test.y < 0 || test.y > 1) continue;
             newpoly.push_back(L.interp(test.y));
-
         }
     }
     return newpoly;
