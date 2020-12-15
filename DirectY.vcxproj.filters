@@ -60,13 +60,16 @@
     <ClInclude Include="src\framework\geometry.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\framework\system\SubSystem.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\framework\system\WindowsSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\render\shaders\FragmentShader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\system\Win32.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\framework\system\DYWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -105,6 +108,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\render\shaders\FragmentShader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framework\system\Win32.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

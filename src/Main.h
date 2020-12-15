@@ -1,10 +1,10 @@
 ﻿#pragma once
-#include <Windows.h>
 #include <glm/gtx/transform.hpp>
 #include "render/Renderer.h"
+#include "framework/system/"
 class Main {
 public:
-    Main(HWND hwnd, int width, int height);
+    Main(std::shared_ptr<Window>);
     void Run();
     ~Main() {
         delete _renderer;
