@@ -8,10 +8,10 @@ static constexpr float EPS = 1e-7f;
 
 void viewPort_transform(Vertex& vertex, int width, int height) {
 
-    float x = vertex.pos.x;
-    float y = vertex.pos.y;
-    vertex.pos.x = (x * 0.5f + 0.5f) * width;
-    vertex.pos.y = (y * 0.5f + 0.5f) * height;
+    float x = vertex.screenPos.x;
+    float y = vertex.screenPos.y;
+    vertex.screenPos.x = (x * 0.5f + 0.5f) * width;
+    vertex.screenPos.y = (y * 0.5f + 0.5f) * height;
 
     //assert(vertex.pos.x >= 0 && vertex.pos.x <= width);
     //assert(vertex.pos.y >= 0 && vertex.pos.y <= height);
@@ -170,8 +170,8 @@ void Renderer::inner_draw_line(Vertex vertices[2]) {
     Vertex tmp[2];
     memcpy(tmp, vertices, sizeof(tmp));
 
-    glm::vec3 v1 = vertices[0].pos / vertices[0].pos.w;
-    glm::vec3 v2 = vertices[1].pos / vertices[1].pos.w;
+    glm::vec3 v1 = vertices[0].screenPos / vertices[0].screenPos.w;
+    glm::vec3 v2 = vertices[1].screenPos / vertices[1].screenPos.w;
 
     glm::vec3 dir = v2 - v1;
 
@@ -204,18 +204,18 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     int height = _frameBuffer->GetHeight();
 
     // Enclose a rectangular area for rasterize
-    glm::ivec2 minnpos = glm::ivec2(v1.pos.x, v1.pos.y);
-    glm::ivec2 maxxpos = glm::ivec2(v1.pos.x + 0.5, v1.pos.y + 0.5);
+    glm::ivec2 minnpos = glm::ivec2(v1.screenPos.x, v1.screenPos.y);
+    glm::ivec2 maxxpos = glm::ivec2(v1.screenPos.x + 0.5, v1.screenPos.y + 0.5);
 
-    minnpos.x = std::min(minnpos.x, (int)v2.pos.x);
-    maxxpos.x = std::max(maxxpos.x, (int)(v2.pos.x + 0.5));
-    minnpos.y = std::min(minnpos.y, (int)v2.pos.y);
-    maxxpos.y = std::max(maxxpos.y, (int)(v2.pos.y + 0.5));
+    minnpos.x = std::min(minnpos.x, (int)v2.screenPos.x);
+    maxxpos.x = std::max(maxxpos.x, (int)(v2.screenPos.x + 0.5));
+    minnpos.y = std::min(minnpos.y, (int)v2.screenPos.y);
+    maxxpos.y = std::max(maxxpos.y, (int)(v2.screenPos.y + 0.5));
 
-    minnpos.x = std::min(minnpos.x, (int)v3.pos.x);
-    maxxpos.x = std::max(maxxpos.x, (int)(v3.pos.x + 0.5));
-    minnpos.y = std::min(minnpos.y, (int)v3.pos.y);
-    maxxpos.y = std::max(maxxpos.y, (int)(v3.pos.y + 0.5));
+    minnpos.x = std::min(minnpos.x, (int)v3.screenPos.x);
+    maxxpos.x = std::max(maxxpos.x, (int)(v3.screenPos.x + 0.5));
+    minnpos.y = std::min(minnpos.y, (int)v3.screenPos.y);
+    maxxpos.y = std::max(maxxpos.y, (int)(v3.screenPos.y + 0.5));
 
     minnpos.x = std::max(minnpos.x, 0);
     minnpos.y = std::max(minnpos.y, 0);
@@ -224,9 +224,9 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
 
     glm::vec2 v[3];
 
-    v[0] = v1.pos;
-    v[1] = v2.pos;
-    v[2] = v3.pos;
+    v[0] = v1.screenPos;
+    v[1] = v2.screenPos;
+    v[2] = v3.screenPos;
 
     glm::vec2 t[3];
     for (int i = 0; i < 3; i++) t[i] = v[(i + 1) % 3] - v[i];
@@ -238,10 +238,13 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
         /*printf("%lf %lf, %lf %lf, %lf %lf\n", v[0].x, v[0].y, v[1].x, v[1].y, v[2].x, v[2].y);*/
         return;
     }
-    glm::mat3x3 colorMat(v1.color / v1.pos.w, v2.color / v2.pos.w, v3.color / v3.pos.w);
-    glm::mat3x4 posMat(v1.pos / v1.pos.w, v2.pos / v2.pos.w, v3.pos / v3.pos.w);
-    glm::mat3x2 texMat(v1.texCoord / v1.pos.w, v2.texCoord / v2.pos.w, v3.texCoord / v3.pos.w);
-    glm::mat3x3 normalMat(v1.normal / v1.pos.w, v2.normal / v2.pos.w, v3.normal / v3.pos.w);
+
+
+    float w1 = v1.screenPos.w, w2 = v2.screenPos.w, w3 = v3.screenPos.w;
+    glm::mat3x3 colorMat(v1.color / w1, v2.color / w2, v3.color / w3);
+    glm::mat3x4 posMat(v1.pos / w1, v2.pos / w2, v3.pos / w3);
+    glm::mat3x2 texMat(v1.texCoord / w1, v2.texCoord / w2, v3.texCoord / w3);
+    glm::mat3x3 normalMat(v1.normal / w1, v2.normal / w2, v3.normal / w3);
     FragmentShaderPayload payload;
 
     for (int j = minnpos.y; j <= maxxpos.y; j++) {
@@ -259,7 +262,7 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
             bool b2 = (std::abs(interp.y) > EPS || (std::abs(interp.y) < EPS && isTopLeftEdge(t[2])));
             bool b3 = (std::abs(interp.z) > EPS || (std::abs(interp.z) < EPS && isTopLeftEdge(t[0])));
             if (!b1 || !b2 || !b3)continue;
-            float z = 1 / (interp.x / v1.pos.w + interp.y / v2.pos.w + interp.z / v3.pos.w);
+            float z = 1 / (interp.x / w1 + interp.y / w2 + interp.z / w3);
             interp *= z;
 
             // Check z-buffer
@@ -276,7 +279,7 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     }
 }
 void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
-    glm::ivec2 start(v1->pos.x + 0.5, v1->pos.y + 0.5), end(v2->pos.x + 0.5, v2->pos.y + 0.5);
+    glm::ivec2 start(v1->screenPos.x + 0.5, v1->screenPos.y + 0.5), end(v2->screenPos.x + 0.5, v2->screenPos.y + 0.5);
 
     bool swp = false;
     int dx = end.x - start.x, dy = end.y - start.y;
@@ -300,13 +303,13 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
     int a = 2 * dy, b = 2 * (dy - dx);
     int cur = 2 * dy - dx;
 
-    glm::vec4 posM[2] = { v1->pos / v1->pos.w, v2->pos / v2->pos.w };
-    glm::vec3 colorM[2] = { v1->color / v1->pos.w, v2->color / v2->pos.w };
+    glm::vec4 posM[2] = { v1->pos / v1->screenPos.w, v2->pos / v2->screenPos.w };
+    glm::vec3 colorM[2] = { v1->color / v1->screenPos.w, v2->color / v2->screenPos.w };
     //glm::vec2 texCoord[2] = { v1->texCoord / v1->pos.w, v2->texCoord / v2->pos.w };
     //glm::vec3 normal[2] = { v1->normal / v1->pos.w, v2->normal / v2->pos.w };
     for (int i = start.x, j = start.y; i <= end.x; i++) {
         float t = (i - start.x) / (float)(end.x - start.x);
-        float z = 1 / ((1 - t) / v1->pos.w + t / v2->pos.w);
+        float z = 1 / ((1 - t) / v1->screenPos.w + t / v2->screenPos.w);
         glm::vec3 color = glm::mix(colorM[0], colorM[1], t) * z /** (-glm::mix(posM[0], posM[1], t).z * 0.5f + 0.5f)*/;
         if (swp) {
             if (_frameBuffer->GetZBuffer(j, i) >= z) {
@@ -380,7 +383,7 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
     //return 3;
     static glm::vec3 initial[3];
     for (int i = 0; i < 3; i++) {
-        initial[i] = glm::vec3(input[i].pos / input[i].pos.w);
+        initial[i] = glm::vec3(input[i].screenPos / input[i].screenPos.w);
     }
     numVertices = 0;
     if (_drawMode == DrawMode::Fill && !backFaceCulling(initial[0], initial[1], initial[2])) return 0;
@@ -392,9 +395,9 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
         numVertices = 3;
         memcpy(output, input, sizeof(Vertex) * 3);
         for (int i = 0; i < numVertices; i++) {
-            output[i].pos.x /= input[i].pos.w;
-            output[i].pos.y /= input[i].pos.w;
-            output[i].pos.z /= input[i].pos.w;
+            output[i].screenPos.x /= input[i].screenPos.w;
+            output[i].screenPos.y /= input[i].screenPos.w;
+            output[i].screenPos.z /= input[i].screenPos.w;
         }
         for (int i = 0; i < 3; i++) indices[i] = i;
         return 3;
@@ -447,9 +450,9 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
         numVertices = 3;
         memcpy(output, input, sizeof(Vertex) * 3);
         for (int i = 0; i < numVertices; i++) {
-            output[i].pos.x /= input[i].pos.w;
-            output[i].pos.y /= input[i].pos.w;
-            output[i].pos.z /= input[i].pos.w;
+            output[i].screenPos.x /= input[i].screenPos.w;
+            output[i].screenPos.y /= input[i].screenPos.w;
+            output[i].screenPos.z /= input[i].screenPos.w;
         }
         for (int i = 0; i < 3; i++) indices[i] = i;
         return 3;
@@ -490,31 +493,38 @@ bool Renderer::backFaceCulling(const glm::vec3& v1, const glm::vec3& v2, const g
 }
 
 Vertex Renderer::linear_interpolation_Perspect(const Vertex& v1, const Vertex& v2, float t) const {
-    Vertex v;
-    float z = 1 / ((1 - t) / v1.pos.w + t / v2.pos.w);
-    v.pos = glm::mix(v1.pos / v1.pos.w, v2.pos / v2.pos.w, t) * z; // tmp[0].pos* (1 - tMin) + tmp[1].pos * tMin;
-    v.color = glm::mix(v1.color / v1.pos.w, v2.color / v2.pos.w, t) * z;
-    v.texCoord = glm::mix(v1.texCoord / v1.pos.w, v2.texCoord / v2.pos.w, t) * z;
-    v.normal = glm::mix(v1.normal / v1.pos.w, v2.normal / v2.pos.w, t) * z;
 
-    v.pos.x /= v.pos.w;
-    v.pos.y /= v.pos.w;
-    v.pos.z /= v.pos.w;
+    float w1 = v1.screenPos.w, w2 = v2.screenPos.w;
+
+    Vertex v;
+    float z = 1 / ((1 - t) / w1 + t / w2);
+    v.pos = glm::mix(v1.pos / w1, v2.pos / w2, t) * z; // tmp[0].pos* (1 - tMin) + tmp[1].pos * tMin;
+    v.screenPos = glm::mix(v1.screenPos / w1, v2.screenPos / w2, t) * z;
+    v.color = glm::mix(v1.color / w1, v2.color / w2, t) * z;
+    v.texCoord = glm::mix(v1.texCoord / w1, v2.texCoord / w2, t) * z;
+    v.normal = glm::mix(v1.normal / w1, v2.normal / w2, t) * z;
+
+    v.screenPos.x /= v.screenPos.w;
+    v.screenPos.y /= v.screenPos.w;
+    v.screenPos.z /= v.screenPos.w;
     return v;
 }
 
 Vertex Renderer::barycentric_interpolation_Perspect(const Vertex& v1, const Vertex& v2, const Vertex& v3, glm::vec3 bary) const {
+
+    float w1 = v1.screenPos.w, w2 = v2.screenPos.w, w3 = v3.screenPos.w;
     Vertex v;
-    float z = 1 / (bary.x / v1.pos.w + bary.y / v2.pos.w + bary.z / v3.pos.w);
+    float z = 1 / (bary.x / w1 + bary.y / w2 + bary.z / w3);
     bary *= z;
 
-    v.pos = glm::mat3x4(v1.pos / v1.pos.w, v2.pos / v2.pos.w, v3.pos / v3.pos.w) * bary;
-    v.color = glm::mat3x3(v1.color / v1.pos.w, v2.color / v2.pos.w, v3.color / v3.pos.w) * bary;
-    v.texCoord = glm::mat3x2(v1.texCoord / v1.pos.w, v2.texCoord / v2.pos.w, v3.texCoord / v3.pos.w) * bary;
-    v.normal = glm::mat3x3(v1.normal / v1.pos.w, v2.normal / v2.pos.w, v3.normal / v3.pos.w) * bary;
+    v.pos = glm::mat3x4(v1.pos / w1, v2.pos / w2, v3.pos / w3) * bary;
+    v.screenPos = glm::mat3x4(v1.screenPos / w1, v2.screenPos / w2, v3.screenPos / w3) * bary;
+    v.color = glm::mat3x3(v1.color / w1, v2.color / w2, v3.color / w3) * bary;
+    v.texCoord = glm::mat3x2(v1.texCoord / w1, v2.texCoord / w2, v3.texCoord / w3) * bary;
+    v.normal = glm::mat3x3(v1.normal / w1, v2.normal / w2, v3.normal / w3) * bary;
 
-    v.pos.x /= v.pos.w;
-    v.pos.y /= v.pos.w;
-    v.pos.z /= v.pos.w;
+    v.screenPos.x /= v.screenPos.w;
+    v.screenPos.y /= v.screenPos.w;
+    v.screenPos.z /= v.screenPos.w;
     return v;
 }

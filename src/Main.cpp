@@ -20,7 +20,9 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     _renderer->SetVertexShader(_vertexShader);
     _renderer->SetFragmentShader(std::make_shared<FragmentShader>());
 
-    _camera = std::make_unique<Camera>(glm::vec3(0, 0, 4.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::pi<float>() / 4, 800.f / 600.f, 0.5f, 100.f);
+
+    _camera = std::make_unique<Camera>(glm::vec3(0, 0, -4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::pi<float>() / 4, 800.f / 600.f, 1.0f, 100.f);
+    _vertexShader->SetProjTransform(_camera->getProjectTransform());
     //Vertex triangle[6] = {
     //    Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
     //    Vertex(glm::vec4(-0.5, -0.5, 0, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1)),
@@ -43,7 +45,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     //};
 
     ObjLoader loader;
-    loader.load("models/cube.obj");
+    loader.load("models/gd5k.obj");
     auto vs = loader.getVertices();
     _numVertices = vs.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), vs.data());
@@ -62,7 +64,7 @@ void Main::Update() {
     if (mouseInfo.isMouseLeftDown) {
         // Mouse Downed
         auto moved = mouseInfo.mousePos - _oldMousePos;
-        _curOrbitParameter = _oldOrbitParameter + glm::vec2(moved) * 0.003f;
+        _curOrbitParameter = _oldOrbitParameter + glm::vec2(moved) * 0.005f;
 
         constexpr float pi = glm::pi<float>();
         _curOrbitParameter.x = std::max(-pi, std::min(pi, _curOrbitParameter.x));
@@ -78,16 +80,14 @@ void Main::Update() {
     _camera->SetEyePos(r * glm::vec3(r2 * std::sin(_curOrbitParameter.x),
         -std::sin(_curOrbitParameter.y), -r2 * std::cos(_curOrbitParameter.x)));
 
-    _vertexShader->SetViewProjTransform(_camera->getViewProjectTransform());
-
-
+    _vertexShader->SetViewTransform(_camera->getViewTransform());
     _wasMouseLeftDown = mouseInfo.isMouseLeftDown;
 }
 
 void Main::Draw() {
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
-    //_renderer->SetDrawMode(DrawMode::WireFrame);
+    _renderer->SetDrawMode(DrawMode::WireFrame);
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
