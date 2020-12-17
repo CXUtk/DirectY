@@ -18,10 +18,11 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
 
     _vertexShader = std::make_shared<VertexShader>();
     _renderer->SetVertexShader(_vertexShader);
-    _renderer->SetFragmentShader(std::make_shared<FragmentShader>());
+    _fragShader = std::make_shared<FragmentShader>();
+    _renderer->SetFragmentShader(_fragShader);
 
 
-    _camera = std::make_unique<Camera>(glm::vec3(0, 0, -4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::pi<float>() / 4, 800.f / 600.f, 1.0f, 100.f);
+    _camera = std::make_shared<Camera>(glm::vec3(0, 0, -4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::pi<float>() / 4, 800.f / 600.f, 1.0f, 100.f);
     _vertexShader->SetProjTransform(_camera->getProjectTransform());
     //Vertex triangle[6] = {
     //    Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0)),
@@ -46,11 +47,21 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
 
     ObjLoader loader;
     loader.load("models/gd5k.obj");
-    auto vs = loader.getVertices();
-    _numVertices = vs.size();
-    _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), vs.data());
+    _vertices = loader.getVertices();
+    _numVertices = _vertices.size();
+    _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), _vertices.data());
 
-    // _vbuff = _renderer->CreateVertexBuffer(sizeof(triangle), sizeof(Vertex), &triangle);
+    std::vector<Vertex> normalV;
+    for (auto& v : _vertices) {
+        Vertex v1, v2;
+        v1.pos = v.pos;
+        v1.color = glm::vec3(1, 0, 0);
+        v2.pos = v.pos + glm::vec4(v.normal, 0.0f) * 0.25f;
+        v2.color = glm::vec3(1, 0, 0);
+        normalV.push_back(v1);
+        normalV.push_back(v2);
+    }
+    _vbuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices * 2, sizeof(Vertex), normalV.data());
     //_vbuff2 = _renderer->CreateVertexBuffer(sizeof(triangle2), sizeof(Vertex), &triangle2);
     //_vbuff3 = _renderer->CreateVertexBuffer(sizeof(lines), sizeof(Vertex), &lines);
 }
@@ -68,7 +79,7 @@ void Main::Update() {
 
         constexpr float pi = glm::pi<float>();
         _curOrbitParameter.x = std::max(-pi, std::min(pi, _curOrbitParameter.x));
-        _curOrbitParameter.y = std::max(-pi / 2, std::min(pi / 2, _curOrbitParameter.y));
+        _curOrbitParameter.y = std::max(-pi / 2 + 0.001f, std::min(pi / 2 - 0.001f, _curOrbitParameter.y));
     }
     if (!mouseInfo.isMouseLeftDown && _wasMouseLeftDown) {
         // Mouse Up
@@ -79,6 +90,7 @@ void Main::Update() {
     float r2 = std::cos(_curOrbitParameter.y);
     _camera->SetEyePos(r * glm::vec3(r2 * std::sin(_curOrbitParameter.x),
         -std::sin(_curOrbitParameter.y), -r2 * std::cos(_curOrbitParameter.x)));
+    _fragShader->_camera = _camera;
 
     _vertexShader->SetViewTransform(_camera->getViewTransform());
     _wasMouseLeftDown = mouseInfo.isMouseLeftDown;
@@ -87,11 +99,11 @@ void Main::Update() {
 void Main::Draw() {
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
-    _renderer->SetDrawMode(DrawMode::WireFrame);
+    //_renderer->SetDrawMode(DrawMode::WireFrame);
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
-    //_renderer->DrawElements(_vbuff3, 0, 2, Primitives::Lines);
+   //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
 }

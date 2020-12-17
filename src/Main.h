@@ -26,6 +26,9 @@ private:
 
     std::shared_ptr<Renderer> _renderer;
     std::shared_ptr<VertexShader> _vertexShader;
+    std::shared_ptr<FragmentShader> _fragShader;
 
-    std::unique_ptr<Camera> _camera;
+    std::shared_ptr<Camera> _camera;
+
+    std::vector<Vertex> _vertices;
 };

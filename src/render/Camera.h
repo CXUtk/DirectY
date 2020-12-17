@@ -14,6 +14,8 @@ public:
     void SetEyePos(glm::vec3 pos) {
         eyePos = pos;
     }
+
+    glm::vec3 GetEyePos() const { return eyePos; }
 private:
     glm::vec3 eyePos, lookAt, up;
     float fov, aspect, zNear, zFar;

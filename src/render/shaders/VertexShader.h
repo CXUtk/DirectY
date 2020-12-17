@@ -19,4 +19,5 @@ private:
     glm::mat4 _viewTransform;
     glm::mat4 _projTransform;
     glm::mat4 _modelTransform;
+
 };
