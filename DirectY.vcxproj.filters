@@ -78,6 +78,9 @@
     <ClInclude Include="src\render\Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource\Material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -144,5 +147,6 @@
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="src\framework\DirectY.aps" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

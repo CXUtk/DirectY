@@ -57,7 +57,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
         v1.pos = v.pos;
         v1.color = glm::vec3(1, 0, 0);
         v2.pos = v.pos + glm::vec4(v.normal, 0.0f) * 0.25f;
-        v2.color = glm::vec3(1, 0, 0);
+        v2.color = glm::vec3(0, 1, 0);
         normalV.push_back(v1);
         normalV.push_back(v2);
     }
@@ -103,7 +103,7 @@ void Main::Draw() {
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
-   //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
+    _renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
 }

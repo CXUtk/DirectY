@@ -170,6 +170,7 @@
     <ClInclude Include="src\render\shaders\VertexShader.h" />
     <ClInclude Include="src\render\buffers\VertexBuffer.h" />
     <ClInclude Include="src\resource\ObjLoader.h" />
+    <ClInclude Include="src\resource\Material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />
@@ -200,6 +201,7 @@
     <None Include=".gitignore" />
     <None Include="DirectY.aps" />
     <None Include="src\framework\DirectY.aps" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
