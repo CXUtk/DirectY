@@ -1,3 +1,6 @@
-# DirectY Èí¼ş¹âÕ¤»¯äÖÈ¾Æ÷
+# DirectY Software Rasterizer
+
+## What is it?
+As its name suggests, it is the brother of DirectX.
 
 ![](example.png)
