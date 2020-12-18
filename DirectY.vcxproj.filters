@@ -78,7 +78,10 @@
     <ClInclude Include="src\render\Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\resource\Material.h">
+    <ClInclude Include="src\resource\Texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resource\TextureManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -126,6 +129,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\render\Camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resource\TextureManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resource\Texture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

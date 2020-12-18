@@ -170,7 +170,8 @@
     <ClInclude Include="src\render\shaders\VertexShader.h" />
     <ClInclude Include="src\render\buffers\VertexBuffer.h" />
     <ClInclude Include="src\resource\ObjLoader.h" />
-    <ClInclude Include="src\resource\Material.h" />
+    <ClInclude Include="src\resource\Texture.h" />
+    <ClInclude Include="src\resource\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />
@@ -188,6 +189,8 @@
     <ClCompile Include="src\render\shaders\FragmentShader.cpp" />
     <ClCompile Include="src\render\shaders\VertexShader.cpp" />
     <ClCompile Include="src\resource\ObjLoader.cpp" />
+    <ClCompile Include="src\resource\Texture.cpp" />
+    <ClCompile Include="src\resource\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\framework\DirectY.rc" />

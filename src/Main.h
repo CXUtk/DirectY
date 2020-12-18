@@ -3,6 +3,7 @@
 #include "render/Renderer.h"
 #include "framework/system/DYWindow.h"
 #include "render/Camera.h"
+#include "resource/TextureManager.h"
 class Main {
 public:
     Main(std::shared_ptr<DYWindow> window);
@@ -23,6 +24,8 @@ private:
     glm::ivec2 _oldMousePos;
     glm::vec2 _oldOrbitParameter;
     glm::vec2 _curOrbitParameter;
+
+    TextureManager _textureManager;
 
     std::shared_ptr<Renderer> _renderer;
     std::shared_ptr<VertexShader> _vertexShader;

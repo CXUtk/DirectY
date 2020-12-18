@@ -15,9 +15,13 @@ public:
     void SetProjTransform(glm::mat4 proj) {
         _projTransform = proj;
     }
+    void apply() {
+        _totalTransform = _projTransform * _viewTransform * _modelTransform;
+    }
 private:
     glm::mat4 _viewTransform;
     glm::mat4 _projTransform;
     glm::mat4 _modelTransform;
 
+    glm::mat4 _totalTransform;
 };

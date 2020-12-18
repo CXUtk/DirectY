@@ -18,7 +18,10 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
 
     _vertexShader = std::make_shared<VertexShader>();
     _renderer->SetVertexShader(_vertexShader);
+
+    //_vertexShader->SetModelTransform(glm::translate(glm::vec3(0, -1, 0)));
     _fragShader = std::make_shared<FragmentShader>();
+    _fragShader->_texture = _textureManager.GetTexture(0);
     _renderer->SetFragmentShader(_fragShader);
 
 
@@ -46,7 +49,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     //};
 
     ObjLoader loader;
-    loader.load("models/gd5k.obj");
+    loader.load("models/cube.obj");
     _vertices = loader.getVertices();
     _numVertices = _vertices.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), _vertices.data());
@@ -97,13 +100,16 @@ void Main::Update() {
 }
 
 void Main::Draw() {
+
+    _vertexShader->apply();
+
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
     //_renderer->SetDrawMode(DrawMode::WireFrame);
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff2, 0, 3, Primitives::Triangles);
-    _renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
+    //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
 }
