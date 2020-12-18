@@ -16,12 +16,15 @@ public:
         _projTransform = proj;
     }
     void apply() {
-        _totalTransform = _projTransform * _viewTransform * _modelTransform;
+        _totalTransform = _projTransform * _viewTransform;
+        _normalTransform = glm::transpose(glm::inverse(_modelTransform));
     }
 private:
+    // 这些都相当于shader中的uniform变量
     glm::mat4 _viewTransform;
     glm::mat4 _projTransform;
     glm::mat4 _modelTransform;
 
     glm::mat4 _totalTransform;
+    glm::mat4 _normalTransform;
 };
