@@ -10,8 +10,8 @@ struct Vertex {
     glm::vec3 normal;
 
     Vertex() : pos(0), screenPos(0), color(0), texCoord(0), normal(0) {}
-    Vertex(glm::vec4 pos, glm::vec4 screenPos, glm::vec3 color, glm::vec2 texCoord, glm::vec3 normal) :
-        pos(pos), screenPos(screenPos), color(color), texCoord(texCoord), normal(normal) {
+    Vertex(glm::vec4 pos, glm::vec3 color, glm::vec2 texCoord, glm::vec3 normal) :
+        pos(pos), screenPos(0), color(color), texCoord(texCoord), normal(normal) {
     }
 };
 

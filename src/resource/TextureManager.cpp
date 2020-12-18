@@ -27,7 +27,7 @@ void TextureManager::CreateTexture(const std::string& fileName) {
         _textures.push_back(_textures[0]);
         return;
     }
-    _textures.push_back(std::shared_ptr<Texture>(new Texture(width, height, ColorFormat::RGB24, image)));
+    _textures.push_back(std::shared_ptr<Texture>(new Texture(width, height, ColorFormat::RGBA32, image)));
 }
 
 std::shared_ptr<Texture> TextureManager::GetTexture(int id) const {

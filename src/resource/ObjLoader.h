@@ -31,9 +31,7 @@ public:
     std::vector<glm::vec3> Normals;
     std::vector<Face> Triangles;
 
-
     std::vector<Vertex> getVertices() const;
-
 private:
     static constexpr int MAX_BUFFER = 100005;
     static char lineBuffer[MAX_BUFFER];
