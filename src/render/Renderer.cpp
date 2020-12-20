@@ -10,8 +10,8 @@ void viewPort_transform(Vertex& vertex, int width, int height) {
 
     float x = vertex.screenPos.x;
     float y = vertex.screenPos.y;
-    vertex.screenPos.x = (x * 0.5f + 0.5f) * width;
-    vertex.screenPos.y = (y * 0.5f + 0.5f) * height;
+    vertex.screenPos.x = (int)((x * 0.5f + 0.5f) * (width - 1) + 0.5f);
+    vertex.screenPos.y = (int)((y * 0.5f + 0.5f) * (height - 1) + 0.5f);
 
     //assert(vertex.pos.x >= 0 && vertex.pos.x <= width);
     //assert(vertex.pos.y >= 0 && vertex.pos.y <= height);
