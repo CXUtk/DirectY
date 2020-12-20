@@ -11,8 +11,10 @@ struct FragmentShaderPayload {
 
 class FragmentShader {
 public:
-    FragmentShader() {}
+    FragmentShader();
     virtual glm::vec3 fragment_shader(const FragmentShaderPayload& payload);
     std::shared_ptr<Camera> _camera;
     std::shared_ptr<Texture> _texture;
+
+    TextureSampleModeMag _sampleMode;
 };

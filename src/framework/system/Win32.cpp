@@ -111,25 +111,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         break;
     case WM_KEYDOWN:
     {
-        /* switch (wParam) {
-         case VK_LEFT: {
-             rasterizer->RotateCamera(-0.1f, glm::vec3(0, 1, 0));
-             break;
-         }
-         case VK_RIGHT: {
-             rasterizer->RotateCamera(0.1f, glm::vec3(0, 1, 0));
-             break;
-         }
-         case VK_UP: {
-             rasterizer->RotateCamera(-0.1f, glm::vec3(1, 0, 0));
-             break;
-         }
-         case VK_DOWN: {
-             rasterizer->RotateCamera(0.1f, glm::vec3(1, 0, 0));
-             break;
-         }
-         }*/
-
+        Win32Window::_instance->_userInput->KeyDown(wParam);
+        break;
+    }
+    case WM_KEYUP:
+    {
+        Win32Window::_instance->_userInput->KeyUp(wParam);
         break;
     }
     case WM_LBUTTONDOWN: {

@@ -1,6 +1,9 @@
 ﻿#include "FragmentShader.h"
 
 #include <algorithm>
+FragmentShader::FragmentShader() {
+    _sampleMode = TextureSampleModeMag::NEAREST;
+}
 glm::vec3 FragmentShader::fragment_shader(const FragmentShaderPayload& payload) {
     //auto uv = payload.vertex.texCoord;
     //uv *= 5;
@@ -31,6 +34,6 @@ glm::vec3 FragmentShader::fragment_shader(const FragmentShaderPayload& payload) 
     //glm::vec3(0.5) + N * 0.5f;//
 
     glm::vec3 textureColor = glm::vec3(_texture->SampleColor(payload.vertex.texCoord.x, payload.vertex.texCoord.y, true, TextureWarpingMode::CLAMP,
-        TextureSampleModeMag::BI_LINEAR));
+        _sampleMode));
     return   textureColor * (glm::vec3(0.1f) + glm::vec3(0.8f) * diffuse * alpha * alpha) + glm::vec3(specular) * 0.5f;
 }

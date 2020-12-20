@@ -22,6 +22,9 @@ private:
     MouseInfo _oldMouseInfo;
     MouseInfo _curMouseInfo;
 
+    KeyState _oldKeyState;
+    KeyState _curKeyState;
+
     glm::ivec2 _oldMousePos;
     glm::vec2 _oldOrbitParameter;
     glm::vec2 _curOrbitParameter;

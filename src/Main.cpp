@@ -57,7 +57,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     //};
 
     ObjLoader loader;
-    loader.load("models/cube.obj");
+    loader.load("models/spot_triangulated_good.obj");
     _vertices = loader.getVertices();
     _numVertices = _vertices.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), _vertices.data());
@@ -101,7 +101,12 @@ void Main::Update() {
     if (_curWheelPos != _oldWheelPos) {
         int p = _curWheelPos - _oldWheelPos;
         _orbitDistance -= p * 0.2f;
-        _orbitDistance = std::max(1.f, std::min(_orbitDistance, 8.f));
+        _orbitDistance = std::max(1.f, std::min(_orbitDistance, 12.f));
+    }
+
+    _curKeyState.isPressed['X'] = _window->getUserInputController()->getKeyState('X');
+    if (_curKeyState.isPressed['X'] && !_oldKeyState.isPressed['X']) {
+        _fragShader->_sampleMode = (TextureSampleModeMag)(!(int)_fragShader->_sampleMode);
     }
 
     //_curOrbitParameter = glm::vec2(0.06, 0.87);
@@ -130,11 +135,12 @@ void Main::Draw() {
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     _renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
-    _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
+    //_renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
 }
 
 void Main::resetInputState() {
     memcpy(&_oldMouseInfo, &_curMouseInfo, sizeof(MouseInfo));
+    memcpy(&_oldKeyState, &_curKeyState, sizeof(KeyState));
     _oldWheelPos = _curWheelPos;
 }

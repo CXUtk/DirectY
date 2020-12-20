@@ -19,3 +19,11 @@ void UserInput::MouseMove(glm::ivec2 pos) {
 void UserInput::MouseWheel(int val) {
     _wheelValue += val / 120;
 }
+
+void UserInput::KeyDown(int keycode) {
+    _keyState.isPressed[keycode] = true;
+}
+
+void UserInput::KeyUp(int keycode) {
+    _keyState.isPressed[keycode] = false;
+}
