@@ -512,7 +512,7 @@ Vertex Renderer::linear_interpolation_Perspect(const Vertex& v1, const Vertex& v
 
 Vertex Renderer::barycentric_interpolation_Perspect(const Vertex& v1, const Vertex& v2, const Vertex& v3, glm::vec3 bary) const {
 
-    float w1 = v1.screenPos.w, w2 = v2.screenPos.w, w3 = v3.screenPos.w;
+    float w1 = std::abs(v1.screenPos.w), w2 = std::abs(v2.screenPos.w), w3 = std::abs(v3.screenPos.w);
     Vertex v;
     float z = 1 / (bary.x / w1 + bary.y / w2 + bary.z / w3);
     bary *= z;

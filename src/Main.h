@@ -19,7 +19,8 @@ private:
     int _numVertices, _numFaces;
 
 
-    bool _wasMouseLeftDown;
+    MouseInfo _oldMouseInfo;
+    MouseInfo _curMouseInfo;
 
     glm::ivec2 _oldMousePos;
     glm::vec2 _oldOrbitParameter;
@@ -28,6 +29,9 @@ private:
 
     int _oldWheelPos;
     int _curWheelPos;
+
+
+
 
     TextureManager _textureManager;
 
@@ -38,4 +42,7 @@ private:
     std::shared_ptr<Camera> _camera;
 
     std::vector<Vertex> _vertices;
+
+
+    void resetInputState();
 };

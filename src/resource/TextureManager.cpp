@@ -10,7 +10,7 @@ TextureManager::TextureManager() {
             tData.push_back(((i + j) & 1) ? 0x7F : 0xFF);
         }
     }
-    _textures.push_back(std::shared_ptr<Texture>(new Texture(8, 8, ColorFormat::GRAYSCALE8, tData)));
+    _textures.push_back(std::shared_ptr<Texture>(new Texture(8, 8, TextureColorFormat::GRAYSCALE8, tData)));
 }
 TextureManager::~TextureManager() {
 }
@@ -27,7 +27,7 @@ void TextureManager::CreateTexture(const std::string& fileName) {
         _textures.push_back(_textures[0]);
         return;
     }
-    _textures.push_back(std::shared_ptr<Texture>(new Texture(width, height, ColorFormat::RGBA32, image)));
+    _textures.push_back(std::shared_ptr<Texture>(new Texture(width, height, TextureColorFormat::RGBA32, image)));
 }
 
 std::shared_ptr<Texture> TextureManager::GetTexture(int id) const {

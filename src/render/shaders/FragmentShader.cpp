@@ -29,5 +29,8 @@ glm::vec3 FragmentShader::fragment_shader(const FragmentShaderPayload& payload) 
     float v = dis / 9;
     float alpha = std::max(1 - v * v, 0.f);
     //glm::vec3(0.5) + N * 0.5f;//
-    return  glm::vec3(_texture->SampleColor(payload.vertex.texCoord.x, payload.vertex.texCoord.y, true)) * (glm::vec3(0.1f) + glm::vec3(0.8f) * diffuse * alpha * alpha) + glm::vec3(specular) * 0.5f;
+
+    glm::vec3 textureColor = glm::vec3(_texture->SampleColor(payload.vertex.texCoord.x, payload.vertex.texCoord.y, true, TextureWarpingMode::CLAMP,
+        TextureSampleModeMag::BI_LINEAR));
+    return   textureColor * (glm::vec3(0.1f) + glm::vec3(0.8f) * diffuse * alpha * alpha) + glm::vec3(specular) * 0.5f;
 }

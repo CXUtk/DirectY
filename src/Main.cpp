@@ -78,21 +78,21 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
 }
 
 void Main::Update() {
-    auto mouseInfo = _window->getMouseInfo();
-    if (mouseInfo.isMouseLeftDown && !_wasMouseLeftDown) {
+    _curMouseInfo = _window->getMouseInfo();
+    if (_curMouseInfo.isMouseLeftDown && !_oldMouseInfo.isMouseLeftDown) {
         // Mouse Down
-        _oldMousePos = mouseInfo.mousePos;
+        _oldMousePos = _curMouseInfo.mousePos;
     }
-    if (mouseInfo.isMouseLeftDown) {
+    if (_curMouseInfo.isMouseLeftDown) {
         // Mouse Downed
-        auto moved = mouseInfo.mousePos - _oldMousePos;
+        auto moved = _curMouseInfo.mousePos - _oldMousePos;
         _curOrbitParameter = _oldOrbitParameter + glm::vec2(moved) * 0.005f;
 
         constexpr float pi = glm::pi<float>();
         _curOrbitParameter.x = std::max(-pi, std::min(pi, _curOrbitParameter.x));
         _curOrbitParameter.y = std::max(-pi / 2 + 0.001f, std::min(pi / 2 - 0.001f, _curOrbitParameter.y));
     }
-    if (!mouseInfo.isMouseLeftDown && _wasMouseLeftDown) {
+    else if (!_curMouseInfo.isMouseLeftDown && _oldMouseInfo.isMouseLeftDown) {
         // Mouse Up
         _oldOrbitParameter = _curOrbitParameter;
     }
@@ -116,10 +116,7 @@ void Main::Update() {
 
     //printf("%lf %lf %lf\n", _curOrbitParameter.x, _curOrbitParameter.y, _orbitDistance);
 
-    // 重置输入控制变量
-    _wasMouseLeftDown = mouseInfo.isMouseLeftDown;
-    _oldWheelPos = _curWheelPos;
-
+    resetInputState();
 }
 
 void Main::Draw() {
@@ -129,10 +126,15 @@ void Main::Draw() {
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
     //_renderer->SetDrawMode(DrawMode::WireFrame);
-    //_renderer->SetCullMode(CullMode::CullClockwise);
+    _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     _renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
+}
+
+void Main::resetInputState() {
+    memcpy(&_oldMouseInfo, &_curMouseInfo, sizeof(MouseInfo));
+    _oldWheelPos = _curWheelPos;
 }
