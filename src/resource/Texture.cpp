@@ -9,14 +9,14 @@ Texture::~Texture() {
 }
 
 glm::vec4 Texture::SampleColor(float u, float v, bool invY) const {
-    int x = u * width;
-    int y = v * height;
+    int x = (int)(u * width);
+    int y = (int)(v * height);
     return glm::vec4(getPixel(x, y, invY));
 }
 
 glm::vec4 Texture::getPixel(int x, int y, bool invY) const {
     x = std::min(std::max(x, 0), width - 1);
-    y = std::min(std::max(y, 0), width - 1);
+    y = std::min(std::max(y, 0), height - 1);
     int r = invY ? (height - y - 1) : y;
     int c = x;
     int idx = r * width + c;

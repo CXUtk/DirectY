@@ -3,6 +3,7 @@
 #include "../device/GraphicDevice.h"
 #include "SystemUtils.h"
 
+#include "UserInput.h"
 class DYWindow {
 public:
     DYWindow() = default;
@@ -14,4 +15,5 @@ public:
     virtual int getHeight() const = 0;
     virtual std::shared_ptr<GraphicDevice> getGraphicDevice() const = 0;
     virtual MouseInfo getMouseInfo() const = 0;
+    virtual std::shared_ptr<UserInput> getUserInputController() const = 0;
 };

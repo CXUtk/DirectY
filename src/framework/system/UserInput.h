@@ -1,21 +1,21 @@
 ﻿#pragma once
-#include <Windows.h>
 #include <glm/glm.hpp>
 #include "SystemUtils.h"
 
 class UserInput {
-
-    friend LRESULT CALLBACK  WndProc(HWND, UINT, WPARAM, LPARAM);
-
 public:
-    UserInput() = default;
+    UserInput();
     ~UserInput() = default;
     MouseInfo getMouseInfo()const { return _mouseInfo; }
-
-private:
-    MouseInfo _mouseInfo;
-
+    int getMouseWheel()const { return _wheelValue; }
     void MouseDown();
     void MouseUp();
     void MouseMove(glm::ivec2 pos);
+    void MouseWheel(int val);
+
+private:
+    MouseInfo _mouseInfo;
+    int _wheelValue;
+
+
 };

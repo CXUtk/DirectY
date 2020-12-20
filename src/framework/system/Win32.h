@@ -17,9 +17,12 @@ public:
     int getWidth() const override { return WIDTH; }
     int getHeight() const override { return HEIGHT; }
     MouseInfo getMouseInfo() const override {
-        auto info = _userInput.getMouseInfo();
+        auto info = _userInput->getMouseInfo();
         info.mousePos.y = HEIGHT - info.mousePos.y - 1;
         return info;
+    }
+    std::shared_ptr<UserInput> getUserInputController() const override {
+        return _userInput;
     }
     std::shared_ptr<GraphicDevice> getGraphicDevice() const override { return _graphicDevice; }
 
@@ -40,7 +43,7 @@ private:
 
     std::shared_ptr<GraphicDevice> _graphicDevice;
 
-    UserInput _userInput;
+    std::shared_ptr<UserInput> _userInput;
 
     ATOM register_window();
     BOOL init_instance();

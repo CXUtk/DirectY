@@ -11,6 +11,11 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     _curOrbitParameter = _oldOrbitParameter = glm::vec2(0);
     _oldMousePos = glm::vec2(0, _height - 2);
 
+    _oldWheelPos = 0;
+    _curWheelPos = 0;
+
+    _orbitDistance = 4.f;
+
     _width = window->getWidth();
     _height = window->getHeight();
 
@@ -20,9 +25,9 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     _renderer->SetVertexShader(_vertexShader);
 
 
-    _textureManager.CreateTexture("textures/spot_texture.png");
+    _textureManager.CreateTexture("textures/lol.png");
 
-    _vertexShader->SetModelTransform(glm::rotate(glm::pi<float>(), glm::vec3(0, 1, 0)));
+    // _vertexShader->SetModelTransform(glm::rotate(glm::pi<float>(), glm::vec3(0, 1, 0)));
     _fragShader = std::make_shared<FragmentShader>();
     _fragShader->_texture = _textureManager.GetTexture(1);
     _renderer->SetFragmentShader(_fragShader);
@@ -31,13 +36,13 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     _camera = std::make_shared<Camera>(glm::vec3(0, 0, 4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::pi<float>() / 4, 800.f / 600.f, 1.0f, 100.f);
     _vertexShader->SetProjTransform(_camera->getProjectTransform());
     Vertex triangle[6] = {
-        Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0), glm::vec3(0, 0, 1)),
-        Vertex(glm::vec4(-0.5, -0.5, 0, 1), glm::vec3(0, 1, 0), glm::vec2(0, 1), glm::vec3(0, 0, 1)),
-        Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 1), glm::vec3(0, 0, 1)),
+        Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 1), glm::vec3(0, 0, 1)),
+        Vertex(glm::vec4(-0.5, -0.5, 0, 1), glm::vec3(0, 1, 0), glm::vec2(0, 0), glm::vec3(0, 0, 1)),
+        Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0), glm::vec3(0, 0, 1)),
 
-        Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 0), glm::vec3(0, 0, 1)),
-        Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 1), glm::vec3(0, 0, 1)),
-        Vertex(glm::vec4(0.5, 0.5, 0, 1), glm::vec3(1, 1, 0), glm::vec2(1, 0), glm::vec3(0, 0, 1))
+        Vertex(glm::vec4(-0.5, 0.5, 0, 1), glm::vec3(1, 0, 0), glm::vec2(0, 1), glm::vec3(0, 0, 1)),
+        Vertex(glm::vec4(0.5, -0.5, 0, 1), glm::vec3(0, 0, 1), glm::vec2(1, 0), glm::vec3(0, 0, 1)),
+        Vertex(glm::vec4(0.5, 0.5, 0, 1), glm::vec3(1, 1, 0), glm::vec2(1, 1), glm::vec3(0, 0, 1))
     };
 
     //Vertex triangle2[3] = {
@@ -52,7 +57,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     //};
 
     ObjLoader loader;
-    loader.load("models/spot_triangulated_good.obj");
+    loader.load("models/cube.obj");
     _vertices = loader.getVertices();
     _numVertices = _vertices.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), _vertices.data());
@@ -92,14 +97,29 @@ void Main::Update() {
         _oldOrbitParameter = _curOrbitParameter;
     }
 
-    float r = 4.0f;
+    _curWheelPos = _window->getUserInputController()->getMouseWheel();
+    if (_curWheelPos != _oldWheelPos) {
+        int p = _curWheelPos - _oldWheelPos;
+        _orbitDistance -= p * 0.2f;
+        _orbitDistance = std::max(1.f, std::min(_orbitDistance, 8.f));
+    }
+
+    //_curOrbitParameter = glm::vec2(0.06, 0.87);
+    //_orbitDistance = 1.2f;
+    float r = _orbitDistance;
     float r2 = std::cos(_curOrbitParameter.y);
     _camera->SetEyePos(r * glm::vec3(-r2 * std::sin(_curOrbitParameter.x),
         -std::sin(_curOrbitParameter.y), r2 * std::cos(_curOrbitParameter.x)));
     _fragShader->_camera = _camera;
 
     _vertexShader->SetViewTransform(_camera->getViewTransform());
+
+    //printf("%lf %lf %lf\n", _curOrbitParameter.x, _curOrbitParameter.y, _orbitDistance);
+
+    // 重置输入控制变量
     _wasMouseLeftDown = mouseInfo.isMouseLeftDown;
+    _oldWheelPos = _curWheelPos;
+
 }
 
 void Main::Draw() {
@@ -111,7 +131,7 @@ void Main::Draw() {
     //_renderer->SetDrawMode(DrawMode::WireFrame);
     //_renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
-    //_renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
+    _renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
     _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();

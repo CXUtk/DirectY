@@ -375,9 +375,9 @@ int Renderer::homo_clipping(Vertex input[3], Vertex* output, int* indices, int& 
     //numVertices = 3;
     //memcpy(output, input, sizeof(Vertex) * 3);
     //for (int i = 0; i < numVertices; i++) {
-    //    output[i].pos.x /= input[i].pos.w;
-    //    output[i].pos.y /= input[i].pos.w;
-    //    output[i].pos.z /= input[i].pos.w;
+    //    output[i].screenPos.x /= input[i].screenPos.w;
+    //    output[i].screenPos.y /= input[i].screenPos.w;
+    //    output[i].screenPos.z /= input[i].screenPos.w;
     //}
     //for (int i = 0; i < 3; i++) indices[i] = i;
     //return 3;

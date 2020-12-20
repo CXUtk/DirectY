@@ -24,6 +24,10 @@ private:
     glm::ivec2 _oldMousePos;
     glm::vec2 _oldOrbitParameter;
     glm::vec2 _curOrbitParameter;
+    float _orbitDistance;
+
+    int _oldWheelPos;
+    int _curWheelPos;
 
     TextureManager _textureManager;
 

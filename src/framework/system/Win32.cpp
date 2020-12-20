@@ -8,6 +8,7 @@ Win32Window* Win32Window::_instance = nullptr;
 
 Win32Window::Win32Window() {
     _instance = this;
+    _userInput = std::make_shared<UserInput>();
 }
 
 void Win32Window::Init() {
@@ -132,17 +133,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         break;
     }
     case WM_LBUTTONDOWN: {
-        Win32Window::_instance->_userInput.MouseDown();
+        Win32Window::_instance->_userInput->MouseDown();
         break;
     }
     case WM_LBUTTONUP: {
-        Win32Window::_instance->_userInput.MouseUp();
+        Win32Window::_instance->_userInput->MouseUp();
         break;
     }
     case WM_MOUSEMOVE: {
         int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
-        Win32Window::_instance->_userInput.MouseMove(glm::ivec2(xPos, yPos));
+        Win32Window::_instance->_userInput->MouseMove(glm::ivec2(xPos, yPos));
+        break;
+    }
+    case WM_MOUSEWHEEL: {
+        Win32Window::_instance->_userInput->MouseWheel((short)HIWORD(wParam));
         break;
     }
     case WM_ERASEBKGND:
