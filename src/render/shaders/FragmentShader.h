@@ -15,6 +15,7 @@ public:
     virtual glm::vec3 fragment_shader(const FragmentShaderPayload& payload);
     std::shared_ptr<Camera> _camera;
     std::shared_ptr<Texture> _texture;
+    std::shared_ptr<Texture> _texture2;
 
     TextureSampleModeMag _sampleMode;
 };

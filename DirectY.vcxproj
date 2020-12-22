@@ -172,6 +172,7 @@
     <ClInclude Include="src\resource\ObjLoader.h" />
     <ClInclude Include="src\resource\Texture.h" />
     <ClInclude Include="src\resource\TextureManager.h" />
+    <ClInclude Include="src\scene\VoronoiDiagram.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DirectY.cpp" />

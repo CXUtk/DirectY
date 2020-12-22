@@ -14,7 +14,7 @@ TextureManager::TextureManager() {
 }
 TextureManager::~TextureManager() {
 }
-void TextureManager::CreateTexture(const std::string& fileName) {
+int TextureManager::CreateTexture(const std::string& fileName) {
     std::vector<unsigned char> image; //the raw pixels
     unsigned width, height;
 
@@ -25,9 +25,10 @@ void TextureManager::CreateTexture(const std::string& fileName) {
     if (error) {
         std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
         _textures.push_back(_textures[0]);
-        return;
+        return _textures.size() - 1;
     }
     _textures.push_back(std::shared_ptr<Texture>(new Texture(width, height, TextureColorFormat::RGBA32, image)));
+    return _textures.size() - 1;
 }
 
 std::shared_ptr<Texture> TextureManager::GetTexture(int id) const {

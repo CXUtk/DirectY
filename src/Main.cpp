@@ -26,10 +26,12 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
 
 
     _textureManager.CreateTexture("textures/lol.png");
+    _textureManager.CreateTexture("textures/exampleNormal.png");
 
     // _vertexShader->SetModelTransform(glm::rotate(glm::pi<float>(), glm::vec3(0, 1, 0)));
     _fragShader = std::make_shared<FragmentShader>();
     _fragShader->_texture = _textureManager.GetTexture(1);
+    _fragShader->_texture2 = _textureManager.GetTexture(2);
     _renderer->SetFragmentShader(_fragShader);
 
 
@@ -130,7 +132,7 @@ void Main::Draw() {
 
     _renderer->ClearStats();
     _renderer->ClearFrameBuffer();
-    _renderer->SetDrawMode(DrawMode::WireFrame);
+    //_renderer->SetDrawMode(DrawMode::WireFrame);
     _renderer->SetCullMode(CullMode::CullClockwise);
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     _renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
