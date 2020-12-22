@@ -19,7 +19,17 @@ void viewPort_transform(Vertex& vertex, int width, int height) {
 
 
 Renderer::Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphicDevice) {
-    _frameBuffer = new FrameBuffer(width, height);
+
+
+    //_sampleConfig.samplePoints[0] = glm::vec2(0.5, 0.5);
+    //_sampleConfig.sampleSize = 1;
+    _sampleConfig.samplePoints[0] = glm::vec2(0.125, 0.625);
+    _sampleConfig.samplePoints[1] = glm::vec2(0.325, 0.125);
+    _sampleConfig.samplePoints[2] = glm::vec2(0.625, 0.875);
+    _sampleConfig.samplePoints[3] = glm::vec2(0.875, 0.325);
+    _sampleConfig.sampleSize = 4;
+
+    _frameBuffer = new FrameBuffer(width, height, _sampleConfig.sampleSize);
     _graphicDevice = graphicDevice;
     _drawMode = DrawMode::Fill;
     _cullMode = CullMode::None;
@@ -247,34 +257,39 @@ void Renderer::rasterize(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
     glm::mat3x3 normalMat(v1.normal / w1, v2.normal / w2, v3.normal / w3);
     FragmentShaderPayload payload;
 
+
+    const int sampleNum = _sampleConfig.sampleSize;
+
     for (int j = minnpos.y; j <= maxxpos.y; j++) {
         for (int i = minnpos.x; i <= maxxpos.x; i++) {
-            glm::vec2 pos = glm::vec2(i + 0.5f, j + 0.5f);
+            for (int k = 0; k < sampleNum; k++) {
+                glm::vec2 pos = glm::vec2(i, j) + _sampleConfig.samplePoints[k];
 
-            // Barycentric calculation
-            glm::vec2 uv = interpTransform * (pos - v[0]);
+                // Barycentric calculation
+                glm::vec2 uv = interpTransform * (pos - v[0]);
 
 
-            if (isnan(uv.x) || isnan(uv.y) || uv.x < -EPS || uv.x > 1 + EPS || uv.y < -EPS || uv.y > 1 + EPS || uv.x + uv.y > 1 + EPS) continue;
-            glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
+                if (isnan(uv.x) || isnan(uv.y) || uv.x < -EPS || uv.x > 1 + EPS || uv.y < -EPS || uv.y > 1 + EPS || uv.x + uv.y > 1 + EPS) continue;
+                glm::vec3 interp = glm::vec3(1 - uv.x - uv.y, uv.x, uv.y);
 
-            bool b1 = (std::abs(interp.x) > EPS || (std::abs(interp.x) < EPS && isTopLeftEdge(t[1])));
-            bool b2 = (std::abs(interp.y) > EPS || (std::abs(interp.y) < EPS && isTopLeftEdge(t[2])));
-            bool b3 = (std::abs(interp.z) > EPS || (std::abs(interp.z) < EPS && isTopLeftEdge(t[0])));
-            if (!b1 || !b2 || !b3)continue;
-            float z = 1 / (interp.x / w1 + interp.y / w2 + interp.z / w3);
-            interp *= z;
+                bool b1 = (std::abs(interp.x) > EPS || (std::abs(interp.x) < EPS && isTopLeftEdge(t[1])));
+                bool b2 = (std::abs(interp.y) > EPS || (std::abs(interp.y) < EPS && isTopLeftEdge(t[2])));
+                bool b3 = (std::abs(interp.z) > EPS || (std::abs(interp.z) < EPS && isTopLeftEdge(t[0])));
+                if (!b1 || !b2 || !b3)continue;
+                float z = 1 / (interp.x / w1 + interp.y / w2 + interp.z / w3);
+                interp *= z;
 
-            // Check z-buffer
-            if (z > _frameBuffer->GetZBuffer(i, j)) continue;
+                // Check z-buffer
+                if (z > _frameBuffer->GetZBuffer(i, j, k)) continue;
 
-            payload.vertex.color = colorMat * interp;
-            payload.vertex.pos = posMat * interp;
-            payload.vertex.texCoord = texMat * interp;
-            payload.vertex.normal = normalMat * interp;
+                payload.vertex.color = colorMat * interp;
+                payload.vertex.pos = posMat * interp;
+                payload.vertex.texCoord = texMat * interp;
+                payload.vertex.normal = normalMat * interp;
 
-            _frameBuffer->Write(i, j, _fragmentShader->fragment_shader(payload));
-            _frameBuffer->WriteZBuffer(i, j, z);
+                _frameBuffer->Write(i, j, k, _fragmentShader->fragment_shader(payload));
+                _frameBuffer->WriteZBuffer(i, j, k, z);
+            }
         }
     }
 }
@@ -312,15 +327,15 @@ void Renderer::bresenham(const Vertex* v1, const Vertex* v2) {
         float z = 1 / ((1 - t) / v1->screenPos.w + t / v2->screenPos.w);
         glm::vec3 color = glm::mix(colorM[0], colorM[1], t) * z /** (-glm::mix(posM[0], posM[1], t).z * 0.5f + 0.5f)*/;
         if (swp) {
-            if (_frameBuffer->GetZBuffer(j, i) >= z) {
-                _frameBuffer->Write(j, i, color);/*fragment_shader(position, color, texCoord)*/
-                _frameBuffer->WriteZBuffer(j, i, z);
+            if (_frameBuffer->GetZBuffer(j, i, 0) >= z) {
+                _frameBuffer->WriteFull(j, i, color);/*fragment_shader(position, color, texCoord)*/
+                _frameBuffer->WriteZBuffer(j, i, 0, z);
             }
         }
         else {
-            if (_frameBuffer->GetZBuffer(i, j) >= z) {
-                _frameBuffer->Write(i, j, color);
-                _frameBuffer->WriteZBuffer(i, j, z);
+            if (_frameBuffer->GetZBuffer(i, j, 0) >= z) {
+                _frameBuffer->WriteFull(i, j, color);
+                _frameBuffer->WriteZBuffer(i, j, 0, z);
             }
         }
         if (cur <= 0) {

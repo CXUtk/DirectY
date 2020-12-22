@@ -59,7 +59,7 @@ Main::Main(std::shared_ptr<DYWindow> window) : _window(window) {
     //};
 
     ObjLoader loader;
-    loader.load("models/spot_triangulated_good.obj");
+    loader.load("models/cube.obj");
     _vertices = loader.getVertices();
     _numVertices = _vertices.size();
     _modelBuff = _renderer->CreateVertexBuffer(sizeof(Vertex) * _numVertices, sizeof(Vertex), _vertices.data());
@@ -137,7 +137,7 @@ void Main::Draw() {
     //_renderer->DrawElements(_vbuff, 0, 6, Primitives::Triangles);
     _renderer->DrawElements(_vbuff2, 0, 6, Primitives::Triangles);
     //_renderer->DrawElements(_vbuff, 0, _vertices.size() * 2, Primitives::Lines);
-    //_renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
+    _renderer->DrawElements(_modelBuff, 0, _numVertices, Primitives::Triangles);
     _renderer->Present();
 }
 

@@ -19,9 +19,9 @@ glm::vec3 FragmentShader::fragment_shader(const FragmentShaderPayload& payload) 
     // 光照模型中法向量需要先进行normalize，否则插值出来的法向量并不一定正确
     auto N = glm::normalize(payload.vertex.normal);
 
-    N = glm::vec3(_texture2->SampleColor(payload.vertex.texCoord.x, payload.vertex.texCoord.y, true, TextureWarpingMode::CLAMP,
-        TextureSampleModeMag::NEAREST));
-    N = glm::normalize(N * 2.f - glm::vec3(1.0));
+    //N = glm::vec3(_texture2->SampleColor(payload.vertex.texCoord.x, payload.vertex.texCoord.y, true, TextureWarpingMode::CLAMP,
+    //    TextureSampleModeMag::NEAREST));
+    //N = glm::normalize(N * 2.f - glm::vec3(1.0));
     auto I = dirLight - glm::vec3(payload.vertex.pos);
     auto dis = glm::length(I);
     I /= dis;

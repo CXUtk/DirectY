@@ -14,6 +14,6 @@ void GDIDevice::Present(const FrameBuffer* frameBuffer) {
     info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     info.bmiHeader.biSizeImage = 0;
     info.bmiHeader.biCompression = BI_RGB;
-    StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, frameBuffer->GetBuffer(), &info, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, frameBuffer->GetBufferWithOutMultipler(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(_hwnd, hdc);
 }

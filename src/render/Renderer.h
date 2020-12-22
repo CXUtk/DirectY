@@ -36,6 +36,10 @@ enum class ClippingType {
     NeedClip,
 };
 
+struct SampleConfig {
+    int sampleSize;
+    glm::vec2 samplePoints[20];
+};
 
 class Renderer {
 public:
@@ -91,6 +95,8 @@ private:
     std::shared_ptr<GraphicDevice> _graphicDevice;
     std::shared_ptr<VertexShader> _vertexShader;
     std::shared_ptr<FragmentShader> _fragmentShader;
+
+    SampleConfig _sampleConfig;
 
     DrawMode _drawMode;
     CullMode _cullMode;
