@@ -172,6 +172,8 @@
     <ClInclude Include="src\resource\ObjLoader.h" />
     <ClInclude Include="src\resource\Texture.h" />
     <ClInclude Include="src\resource\TextureManager.h" />
+    <ClInclude Include="src\scene\ComputationGeometry.h" />
+    <ClInclude Include="src\scene\Shaders.h" />
     <ClInclude Include="src\scene\VoronoiDiagram.h" />
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +194,8 @@
     <ClCompile Include="src\resource\ObjLoader.cpp" />
     <ClCompile Include="src\resource\Texture.cpp" />
     <ClCompile Include="src\resource\TextureManager.cpp" />
+    <ClCompile Include="src\scene\Shaders.cpp" />
+    <ClCompile Include="src\scene\VoronoiDiagram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\framework\DirectY.rc" />

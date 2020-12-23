@@ -87,6 +87,12 @@
     <ClInclude Include="src\scene\VoronoiDiagram.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\ComputationGeometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Shaders.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -138,6 +144,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\resource\Texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\VoronoiDiagram.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Shaders.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

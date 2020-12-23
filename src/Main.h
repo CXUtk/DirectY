@@ -33,9 +33,6 @@ private:
     int _oldWheelPos;
     int _curWheelPos;
 
-
-
-
     TextureManager _textureManager;
 
     std::shared_ptr<Renderer> _renderer;

@@ -73,6 +73,8 @@ public:
     /// <returns></returns>
     int CreateIndexBuffer(size_t size, void* data);
 
+    void ModifyVertexBuffer(int id, size_t size, size_t sizePerVertex, void* data);
+
     /// <summary>
     /// 
     /// </summary>

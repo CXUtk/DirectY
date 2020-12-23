@@ -5,14 +5,14 @@
 #include "framework/system/Win32.h"
 #include <ctime>
 #include <cstdio>
-#include "Main.h"
+#include "scene/VoronoiDiagram.h"
 
 
 int main() {
     std::shared_ptr<DYWindow> window = std::make_shared<Win32Window>();
     window->Init();
 
-    Main main(window);
+    VoronoiDiagram main(window);
     auto lastT = clock();
     auto lastFrameTime = clock();
     int cnt = 0;

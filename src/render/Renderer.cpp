@@ -21,13 +21,13 @@ void viewPort_transform(Vertex& vertex, int width, int height) {
 Renderer::Renderer(int width, int height, std::shared_ptr<GraphicDevice> graphicDevice) {
 
 
-    //_sampleConfig.samplePoints[0] = glm::vec2(0.5, 0.5);
-    //_sampleConfig.sampleSize = 1;
-    _sampleConfig.samplePoints[0] = glm::vec2(0.125, 0.625);
-    _sampleConfig.samplePoints[1] = glm::vec2(0.325, 0.125);
-    _sampleConfig.samplePoints[2] = glm::vec2(0.625, 0.875);
-    _sampleConfig.samplePoints[3] = glm::vec2(0.875, 0.325);
-    _sampleConfig.sampleSize = 4;
+    _sampleConfig.samplePoints[0] = glm::vec2(0.5, 0.5);
+    _sampleConfig.sampleSize = 1;
+    //_sampleConfig.samplePoints[0] = glm::vec2(0.125, 0.625);
+    //_sampleConfig.samplePoints[1] = glm::vec2(0.325, 0.125);
+    //_sampleConfig.samplePoints[2] = glm::vec2(0.625, 0.875);
+    //_sampleConfig.samplePoints[3] = glm::vec2(0.875, 0.325);
+    //_sampleConfig.sampleSize = 4;
 
     _frameBuffer = new FrameBuffer(width, height, _sampleConfig.sampleSize);
     _graphicDevice = graphicDevice;
@@ -56,6 +56,11 @@ int Renderer::CreateVertexBuffer(size_t size, size_t sizePerVertex, void* data) 
 int Renderer::CreateIndexBuffer(size_t size, void* data) {
     _indexBuffers.push_back(std::make_shared<IndexBuffer>(size, (unsigned int*)data));
     return _indexBuffers.size() - 1;
+}
+
+void Renderer::ModifyVertexBuffer(int id, size_t size, size_t sizePerVertex, void* data) {
+    auto& buffer = _vertexBuffers[id];
+    buffer->ChangeBuffer(data);
 }
 
 void Renderer::DrawElements(int vbuff, size_t offset, size_t size, Primitives primType) {
